@@ -27,24 +27,26 @@ struct Args {
 #[tokio::main]
 async fn main() -> Result<()> {
     let manager = ProcessManager::new(vec![
-        Service::new(
-            "HTTP Server".to_string(),
-            vec![
+        Service {
+            name: "HTTP Server".to_string(),
+            argv: vec![
                 "nix".to_string(),
                 "run".to_string(),
                 "nixpkgs#http-server".to_string(),
             ],
-            Default::default(),
-        ),
-        Service::new(
-            "HTTP Server 2".to_string(),
-            vec![
+            output_color: 24,
+            ..Default::default()
+        },
+        Service {
+            name: "HTTP Server 2".to_string(),
+            argv: vec![
                 "nix".to_string(),
                 "run".to_string(),
                 "nixpkgs#http-server".to_string(),
             ],
-            Default::default(),
-        ),
+            output_color: 104,
+            ..Default::default()
+        },
     ]);
 
     manager.run().await

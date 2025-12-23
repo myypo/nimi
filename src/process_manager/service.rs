@@ -1,7 +1,6 @@
 use crate::error::Result;
 
 use console::style;
-use rand::Rng;
 use std::{env, fmt::Display, path::PathBuf, process::Stdio};
 use tokio::{
     fs,
@@ -20,26 +19,18 @@ pub use config_data::ConfigData;
 /// Modules](https://github.com/NixOS/nixpkgs/blob/3574a048b30fdc5131af4069bd5e14980ce0a6d8/nixos/modules/system/service/portable/service.nix).
 #[derive(Default)]
 pub struct Service {
-    name: String,
-    config_data: Vec<ConfigData>,
-    argv: Vec<String>,
+    /// The name of the service
+    pub name: String,
+    /// Configuration files for the service
+    pub config_data: Vec<ConfigData>,
+    /// Argv used to run the service
+    pub argv: Vec<String>,
 
-    output_color: u8,
+    /// Output color to render header with
+    pub output_color: u8,
 }
 
 impl Service {
-    /// Creates a new instance of a `Service`
-    pub fn new(name: String, argv: Vec<String>, config_data: Vec<ConfigData>) -> Self {
-        let output_color = rand::rng().random();
-
-        Self {
-            name,
-            config_data,
-            argv,
-            output_color,
-        }
-    }
-
     fn print_service_message(&self, msg: impl Display) {
         let title = style(format!("<{}>", self.name)).color256(self.output_color);
 
