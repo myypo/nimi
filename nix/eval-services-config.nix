@@ -67,14 +67,14 @@ in
                 ${inputJSON}
                 EOF
 
-                nimi validate "$out"
+                nimi validate --config "$out"
               '';
         in
         pkgs.writeShellApplication {
           name = "nimi";
           runtimeInputs = [ self'.packages.nimi ];
           text = ''
-            exec nimi --config "${validatedJSON}" "$@"
+            exec nimi run --config "${validatedJSON}" "$@"
           '';
         };
     };
