@@ -22,7 +22,7 @@ in
   config.perSystem =
     { self', pkgs, ... }:
     let
-      lib = pkgs.lib;
+      inherit (pkgs) lib;
 
       nimiModule = {
         options.services = mkOption {
@@ -32,7 +32,11 @@ in
           type = types.attrsOf (
             types.submoduleWith {
               class = "service";
-              modules = [ (lib.modules.importApply "${inputs.nixpkgs}/nixos/modules/system/service/portable/service.nix" { inherit pkgs; }) ];
+              modules = [
+                (lib.modules.importApply "${inputs.nixpkgs}/nixos/modules/system/service/portable/service.nix" {
+                  inherit pkgs;
+                })
+              ];
               specialArgs = {
                 inherit pkgs;
               };
@@ -57,17 +61,30 @@ in
 
           inputJSON = builtins.toJSON evaluatedConfig.config;
 
+          formattedJSON =
+            pkgs.runCommandLocal "nimi-config-formatted.json"
+              {
+                nativeBuildInputs = [
+                  pkgs.jq
+                ];
+              }
+              ''
+                jq . <<'EOF' > "$out"
+                ${inputJSON}
+                EOF
+              '';
+
           validatedJSON =
             pkgs.runCommandLocal "nimi-config-validated.json"
               {
-                nativeBuildInputs = [ self'.packages.nimi ];
+                nativeBuildInputs = [
+                  self'.packages.nimi
+                ];
               }
               ''
-                cat > "$out" <<EOF
-                ${inputJSON}
-                EOF
+                ln -sf "${formattedJSON}" "$out"
 
-                nimi --config "$out" validate
+                nimi --config "${formattedJSON}" validate
               '';
         in
         pkgs.writeShellApplication {

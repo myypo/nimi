@@ -1,5 +1,6 @@
 use console::style;
 use eyre::{Context, ContextCompat, Result, eyre};
+use serde::{Deserialize, Serialize};
 use std::{env, fmt::Display, path::PathBuf, process::Stdio};
 use tokio::{
     fs,
@@ -16,7 +17,7 @@ pub use config_data::ConfigData;
 ///
 /// Rust based mirror of the services as defined in the [NixOS Modular Services
 /// Modules](https://github.com/NixOS/nixpkgs/blob/3574a048b30fdc5131af4069bd5e14980ce0a6d8/nixos/modules/system/service/portable/service.nix).
-#[derive(Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Service {
     /// The name of the service
     pub name: String,

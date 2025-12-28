@@ -10,7 +10,15 @@ in
         pname = cargoToml.package.name;
         inherit (cargoToml.package) version;
 
-        src = self;
+        src = lib.sources.cleanSourceWith {
+          src = self;
+          filter =
+            path: _type:
+            let
+              rel = lib.removePrefix (toString self + "/") (toString path);
+            in
+            rel == "Cargo.toml" || rel == "Cargo.lock" || rel == "src" || lib.hasPrefix "src/" rel;
+        };
 
         cargoLock = {
           lockFile = "${self}/Cargo.lock";
