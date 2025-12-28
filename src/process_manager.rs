@@ -4,9 +4,9 @@
 //! and runs them streaming logs back to the original console.
 
 use eyre::{Context, Result};
-use log::{error, info};
+use log::{debug, error, info};
 use std::{collections::HashMap, sync::Arc, time::Duration};
-use tokio::sync::broadcast;
+use tokio::{process::Command, sync::broadcast};
 
 mod service;
 mod settings;
@@ -77,11 +77,34 @@ impl ProcessManager {
         }
     }
 
+    async fn run_startup_process(bin: &str) -> Result<()> {
+        let output = Command::new(bin)
+            .env_clear()
+            .kill_on_drop(true)
+            .output()
+            .await
+            .wrap_err_with(|| format!("Failed to run startup binary: {:?}", bin))?;
+
+        debug!(target: bin, "{}", str::from_utf8(&output.stdout)?);
+        let stderr = str::from_utf8(&output.stderr)?;
+        if !stderr.is_empty() {
+            error!(target: bin, "{}", stderr);
+        }
+
+        Ok(())
+    }
+
     /// Run the services defined for the process manager instance
     ///
     /// Terminates on `Ctrl-C`
     pub async fn run(self) -> Result<()> {
         info!("Starting process manager...");
+
+        if let Some(startup) = &self.settings.startup.run_on_startup {
+            info!("Running startup binary...");
+            Self::run_startup_process(startup).await?;
+        }
+
         let (shutdown_tx, _) = broadcast::channel::<()>(1);
 
         let settings = Arc::new(self.settings);

@@ -84,7 +84,7 @@ impl Cli {
 
         match self.command {
             Command::Validate => {
-                info!("successfully validated nimi config");
+                info!("Successfully validated nimi config");
 
                 Ok(())
             }

@@ -35,6 +35,17 @@ let
       };
     };
   };
+  startupType = types.submodule {
+    options = {
+      runOnStartup = mkOption {
+        description = ''
+          Binary to run on startup
+        '';
+        type = types.nullOr types.pathInStore;
+        default = null;
+      };
+    };
+  };
 
   settingsType = types.submodule {
     options = {
@@ -43,6 +54,13 @@ let
           Decides how nimi should be restarted
         '';
         type = restartType;
+        default = { };
+      };
+      startup = mkOption {
+        description = ''
+          Decides how nimi should start up
+        '';
+        type = startupType;
         default = { };
       };
     };

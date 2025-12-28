@@ -7,6 +7,19 @@ use serde::{Deserialize, Serialize};
 pub struct Settings {
     /// The restart specific settings
     pub restart: Restart,
+
+    /// The startup specific settings
+    pub startup: Startup,
+}
+
+/// Startup Settings Struct
+///
+/// Configuration for how nimi gets started
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct Startup {
+    /// Binary to run on startup before starting services
+    #[serde(rename = "runOnStartup")]
+    pub run_on_startup: Option<String>,
 }
 
 /// Restart Settings Struct
