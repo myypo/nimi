@@ -9,8 +9,10 @@ use std::{collections::HashMap, fmt::Display};
 use tokio::sync::broadcast;
 
 mod service;
+mod settings;
 
 pub use service::Service;
+pub use settings::Settings;
 
 const ANSI_ORANGE: u8 = 208;
 
@@ -19,12 +21,13 @@ const ANSI_ORANGE: u8 = 208;
 /// Responsible for starting the services and streaming their outputs to the console
 pub struct ProcessManager {
     services: HashMap<String, Service>,
+    settings: Settings,
 }
 
 impl ProcessManager {
     /// Create a new process manager instance
-    pub fn new(services: HashMap<String, Service>) -> Self {
-        Self { services }
+    pub fn new(services: HashMap<String, Service>, settings: Settings) -> Self {
+        Self { services, settings }
     }
 
     fn print_manager_message(msg: impl Display) {

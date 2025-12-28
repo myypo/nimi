@@ -91,7 +91,7 @@ impl Cli {
             Command::Run => {
                 info!("launching process runner");
 
-                ProcessManager::new(config.services)
+                ProcessManager::new(config.services, config.settings)
                     .run()
                     .await
                     .wrap_err("Failed to run processes")
