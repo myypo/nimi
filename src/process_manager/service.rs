@@ -91,7 +91,7 @@ impl Service {
         loop {
             tokio::select! {
                 _ = shutdown_rx.recv() => {
-                    debug!(target: name, "Recieved shutdown signal");
+                    debug!(target: name, "Received shutdown signal");
                     process.kill().await.wrap_err("Failed to kill service process")?;
 
                     process.wait().await?;
