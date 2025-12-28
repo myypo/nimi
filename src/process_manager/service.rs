@@ -87,7 +87,10 @@ impl Service {
                 _ = shutdown_rx.recv() => {
                     debug!(target: name, "Recieved shutdown signal");
                     process.kill().await.wrap_err("Failed to kill service process")?;
-                    break;
+
+                    process.wait().await?;
+
+                    return Ok(());
                 }
                 line = stdout_reader.next_line() => {
                     match line {

@@ -4,9 +4,9 @@
 //! and runs them streaming logs back to the original console.
 
 use eyre::{Context, Result};
-use log::info;
+use log::{error, info};
 use std::{collections::HashMap, sync::Arc};
-use tokio::sync::{Mutex, broadcast};
+use tokio::sync::broadcast;
 
 mod service;
 mod settings;
@@ -31,17 +31,19 @@ impl ProcessManager {
     }
 
     async fn run_process(
-        settings: Arc<Mutex<Settings>>,
+        settings: Arc<Settings>,
         name: &str,
         service: Service,
         mut shutdown_rx: broadcast::Receiver<()>,
     ) -> Result<()> {
-        let settings = settings.lock().await;
-
         let mut current_count = 0;
 
         loop {
-            service.run(name, &mut shutdown_rx).await?;
+            let Err(e) = service.run(name, &mut shutdown_rx).await else {
+                return Ok(());
+            };
+
+            error!(target: name, "{}", e);
 
             match settings.restart.mode {
                 RestartMode::Always => {
@@ -75,31 +77,55 @@ impl ProcessManager {
         info!("Starting process manager...");
         let (shutdown_tx, _) = broadcast::channel::<()>(1);
 
-        let sub_proc_settings = Arc::new(Mutex::new(self.settings));
+        let sub_proc_settings = Arc::new(self.settings);
 
-        let handles: Vec<_> = self
-            .services
-            .into_iter()
-            .map(|(name, service)| {
-                let shutdown_rx = shutdown_tx.subscribe();
-                let sub_proc_man = Arc::clone(&sub_proc_settings);
-                tokio::spawn(async move {
-                    Self::run_process(sub_proc_man, &name, service, shutdown_rx).await
-                })
-            })
-            .collect();
+        let mut join_set = tokio::task::JoinSet::new();
 
-        tokio::signal::ctrl_c()
-            .await
-            .wrap_err("Failed to listen for shutdown event")?;
-
-        info!("Shutting down...");
-
-        let _ = shutdown_tx.send(());
-
-        for handle in handles {
-            let _ = handle.await;
+        for (name, service) in self.services {
+            let shutdown_rx = shutdown_tx.subscribe();
+            let sub_proc_man = Arc::clone(&sub_proc_settings);
+            join_set.spawn(async move {
+                Self::run_process(sub_proc_man, &name, service, shutdown_rx).await
+            });
         }
+
+        let shutdown_signal = tokio::signal::ctrl_c();
+        tokio::pin!(shutdown_signal);
+
+        loop {
+            tokio::select! {
+                shutdown = &mut shutdown_signal => {
+                    shutdown.wrap_err("Failed to listen for shutdown event")?;
+                    info!("Shutting down...");
+                    let _ = shutdown_tx.send(());
+                    break;
+                }
+                result = join_set.join_next() => {
+                    match result {
+                        Some(Ok(Ok(()))) => {
+                            if join_set.is_empty() {
+                                return Ok(());
+                            }
+                        }
+                        Some(Ok(Err(err))) => {
+                            info!("Shutting down...");
+                            let _ = shutdown_tx.send(());
+                            while join_set.join_next().await.is_some() {}
+                            return Err(err).wrap_err("Process failed");
+                        }
+                        Some(Err(err)) => {
+                            info!("Shutting down...");
+                            let _ = shutdown_tx.send(());
+                            while join_set.join_next().await.is_some() {}
+                            return Err(err).wrap_err("Process task panicked");
+                        }
+                        None => return Ok(()),
+                    }
+                }
+            }
+        }
+
+        while join_set.join_next().await.is_some() {}
 
         info!("Finished shutdown");
 
