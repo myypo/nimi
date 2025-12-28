@@ -80,15 +80,15 @@ impl ProcessManager {
         info!("Starting process manager...");
         let (shutdown_tx, _) = broadcast::channel::<()>(1);
 
-        let sub_proc_settings = Arc::new(self.settings);
+        let settings = Arc::new(self.settings);
 
         let mut join_set = tokio::task::JoinSet::new();
 
         for (name, service) in self.services {
             let shutdown_rx = shutdown_tx.subscribe();
-            let sub_proc_man = Arc::clone(&sub_proc_settings);
+            let settings = Arc::clone(&settings);
             join_set.spawn(async move {
-                Self::run_process(sub_proc_man, &name, service, shutdown_rx).await
+                Self::run_process(settings, &name, service, shutdown_rx).await
             });
         }
 

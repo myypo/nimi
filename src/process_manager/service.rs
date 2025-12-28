@@ -5,7 +5,7 @@ use std::{collections::HashMap, env, path::PathBuf, process::Stdio};
 use tokio::{
     fs,
     io::{AsyncBufReadExt, BufReader},
-    process::Command,
+    process::{Child, Command},
     sync::broadcast,
 };
 
@@ -45,18 +45,11 @@ impl Service {
         Ok(dir)
     }
 
-    /// Runs a service to completion, streaming it's logs to the console
-    pub async fn run(&self, name: &str, shutdown_rx: &mut broadcast::Receiver<()>) -> Result<()> {
+    async fn spawn_process(&self) -> Result<Child> {
         let config_dir = self.create_config_directory().await?;
 
-        if self.process.argv.is_empty() {
-            return Err(eyre!(
-                "You must give at least one argument to `process.argv` to run a service"
-            ));
-        }
-
-        let mut process = Command::new(self.process.argv[0].clone())
-            .args(self.process.argv[1..].iter())
+        let child = Command::new(&self.process.argv[0])
+            .args(&self.process.argv[1..])
             .env_clear()
             .env("XDG_CONFIG_HOME", config_dir)
             .stdout(Stdio::piped())
@@ -69,6 +62,19 @@ impl Service {
                     self.process.argv
                 )
             })?;
+
+        Ok(child)
+    }
+
+    /// Runs a service to completion, streaming it's logs to the console
+    pub async fn run(&self, name: &str, shutdown_rx: &mut broadcast::Receiver<()>) -> Result<()> {
+        if self.process.argv.is_empty() {
+            return Err(eyre!(
+                "You must give at least one argument to `process.argv` to run a service"
+            ));
+        }
+
+        let mut process = self.spawn_process().await?;
 
         let stdout = process
             .stdout
