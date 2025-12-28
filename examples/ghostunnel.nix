@@ -28,7 +28,8 @@
             unsafeTarget = true;
           };
         };
-        settings.restart.mode = "always";
+        settings.restart.mode = "up-to-count";
+        settings.restart.time = 1000;
       };
     };
 }

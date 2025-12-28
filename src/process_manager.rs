@@ -5,7 +5,7 @@
 
 use eyre::{Context, Result};
 use log::{error, info};
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, sync::Arc, time::Duration};
 use tokio::sync::broadcast;
 
 mod service;
@@ -37,6 +37,7 @@ impl ProcessManager {
         mut shutdown_rx: broadcast::Receiver<()>,
     ) -> Result<()> {
         let mut current_count = 0;
+        let sleep_time = Duration::from_millis(settings.restart.time as u64);
 
         loop {
             let Err(e) = service.run(name, &mut shutdown_rx).await else {
@@ -67,6 +68,8 @@ impl ProcessManager {
                     return Ok(());
                 }
             }
+
+            tokio::time::sleep(sleep_time).await;
         }
     }
 
