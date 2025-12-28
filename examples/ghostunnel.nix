@@ -28,6 +28,7 @@
             unsafeTarget = true;
           };
         };
+        settings.restart.mode = "never";
       };
     };
 }

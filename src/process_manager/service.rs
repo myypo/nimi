@@ -53,10 +53,10 @@ impl Service {
 
     /// Runs a service to completion, streaming it's logs to the console
     pub async fn run(
-        self,
+        &self,
         name: &str,
         output_color: u8,
-        mut shutdown_rx: broadcast::Receiver<()>,
+        shutdown_rx: &mut broadcast::Receiver<()>,
     ) -> Result<()> {
         let config_dir = self.create_config_directory().await?;
 
@@ -121,6 +121,12 @@ impl Service {
                     }
                 }
             }
+        }
+
+        let status = process.wait().await?;
+
+        if !status.success() {
+            return Err(eyre!("Service `{}` exited with status: {}", name, status));
         }
 
         Ok(())

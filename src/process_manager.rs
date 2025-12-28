@@ -5,14 +5,17 @@
 
 use console::style;
 use eyre::{Context, Result};
-use std::{collections::HashMap, fmt::Display};
-use tokio::sync::broadcast;
+use log::info;
+use std::{collections::HashMap, fmt::Display, sync::Arc};
+use tokio::sync::{Mutex, broadcast};
 
 mod service;
 mod settings;
 
 pub use service::Service;
 pub use settings::Settings;
+
+use crate::process_manager::settings::RestartMode;
 
 const ANSI_ORANGE: u8 = 208;
 
@@ -36,6 +39,45 @@ impl ProcessManager {
         println!("{} {}", title, msg)
     }
 
+    async fn run_process(
+        settings: Arc<Mutex<Settings>>,
+        name: &str,
+        service: Service,
+        output_color: u8,
+        mut shutdown_rx: broadcast::Receiver<()>,
+    ) -> Result<()> {
+        let settings = settings.lock().await;
+
+        let mut current_count = 0;
+
+        loop {
+            service.run(name, output_color, &mut shutdown_rx).await?;
+
+            match settings.restart.mode {
+                RestartMode::Always => {
+                    info!("Process {} exited, restarting (mode: always)", &name);
+                }
+                RestartMode::UpToCount => {
+                    info!(
+                        "Process {} exited, restarting (mode: up-to-count {}/{})",
+                        &name, current_count, settings.restart.count
+                    );
+
+                    if current_count >= settings.restart.count {
+                        return Ok(());
+                    }
+
+                    current_count += 1;
+                }
+                RestartMode::Never => {
+                    info!("Process {} exited, not restarting (mode: never)", &name,);
+
+                    return Ok(());
+                }
+            }
+        }
+    }
+
     /// Run the services defined for the process manager instance
     ///
     /// Terminates on `Ctrl-C`
@@ -43,12 +85,17 @@ impl ProcessManager {
         Self::print_manager_message("Starting services...");
         let (shutdown_tx, _) = broadcast::channel::<()>(1);
 
+        let sub_proc_settings = Arc::new(Mutex::new(self.settings));
+
         let handles: Vec<_> = self
             .services
             .into_iter()
             .map(|(name, service)| {
                 let shutdown_rx = shutdown_tx.subscribe();
-                tokio::spawn(async move { service.run(&name, 24, shutdown_rx).await })
+                let sub_proc_man = Arc::clone(&sub_proc_settings);
+                tokio::spawn(async move {
+                    Self::run_process(sub_proc_man, &name, service, 24, shutdown_rx).await
+                })
             })
             .collect();
 
