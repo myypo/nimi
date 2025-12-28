@@ -1,6 +1,5 @@
-use crate::error::Result;
-
 use console::style;
+use eyre::{Context, ContextCompat, Result, eyre};
 use std::{env, fmt::Display, path::PathBuf, process::Stdio};
 use tokio::{
     fs,
@@ -42,7 +41,11 @@ impl Service {
 
         for cfg in &self.config_data {
             let out_location = dir.join(&cfg.path);
-            fs::symlink(&cfg.source, out_location).await?;
+            fs::symlink(&cfg.source, out_location)
+                .await
+                .wrap_err_with(|| {
+                    format!("Failed to create symlink for config file: {:?}", cfg.path)
+                })?;
         }
 
         Ok(dir)
@@ -52,10 +55,11 @@ impl Service {
     pub async fn run(self, mut shutdown_rx: broadcast::Receiver<()>) -> Result<()> {
         let config_dir = self.create_config_directory().await?;
 
-        assert!(
-            !self.argv.is_empty(),
-            "You must give at least one argument to `process.argv` to run a service"
-        );
+        if !self.argv.is_empty() {
+            return Err(eyre!(
+                "You must give at least one argument to `process.argv` to run a service"
+            ));
+        }
 
         let mut process = Command::new(self.argv[0].clone())
             .args(self.argv[1..].iter())
@@ -64,16 +68,19 @@ impl Service {
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .kill_on_drop(true)
-            .spawn()?;
+            .spawn()
+            .wrap_err_with(|| {
+                format!("Failed to start process. `process.argv`: {:?}", self.argv)
+            })?;
 
         let stdout = process
             .stdout
             .take()
-            .expect("Service process should always have an stdout handle available");
+            .wrap_err("Failed to acquire service process stdout")?;
         let stderr = process
             .stderr
             .take()
-            .expect("Service process should always have an stdout handle available");
+            .wrap_err("Failed to acquire service process stderr")?;
 
         let mut stdout_reader = BufReader::new(stdout).lines();
         let mut stderr_reader = BufReader::new(stderr).lines();
@@ -82,7 +89,7 @@ impl Service {
             tokio::select! {
                 _ = shutdown_rx.recv() => {
                     self.print_service_message("Received shutdown signal");
-                    process.kill().await.ok();
+                    process.kill().await.wrap_err("Failed to kill service process")?;
                     break;
                 }
                 line = stdout_reader.next_line() => {

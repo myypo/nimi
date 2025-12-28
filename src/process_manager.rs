@@ -3,9 +3,8 @@
 //! Can take a rust represntation of some `NixOS` modular services
 //! and runs them streaming logs back to the original console.
 
-use crate::error::Result;
-
 use console::style;
+use eyre::{Context, Result};
 use std::fmt::Display;
 use tokio::sync::broadcast;
 
@@ -50,7 +49,9 @@ impl ProcessManager {
             })
             .collect();
 
-        tokio::signal::ctrl_c().await?;
+        tokio::signal::ctrl_c()
+            .await
+            .wrap_err("Failed to listen for shutdown event")?;
         Self::print_manager_message("Shutting down...");
 
         let _ = shutdown_tx.send(());

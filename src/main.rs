@@ -5,11 +5,10 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand, command};
+use eyre::{Context, Result};
 
-pub use crate::error::{Error, Result};
 use crate::process_manager::{ProcessManager, Service};
 
-pub mod error;
 pub mod process_manager;
 
 /// NixOS modular services runner and container init
@@ -77,6 +76,8 @@ pub enum Command {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    color_eyre::install().wrap_err("Failed to setup color-eyre")?;
+
     let args = Args::parse();
 
     match args.command {
@@ -107,5 +108,5 @@ async fn main() -> Result<()> {
         },
     ]);
 
-    manager.run().await
+    manager.run().await.wrap_err("Process manager run failed")
 }
