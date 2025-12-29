@@ -10,6 +10,9 @@
 
     treefmt-nix.url = "github:numtide/treefmt-nix";
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
+
+    ndg.url = "github:feel-co/ndg";
+    ndg.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   nixConfig = {
