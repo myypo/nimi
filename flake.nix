@@ -14,7 +14,8 @@
     ndg.url = "github:feel-co/ndg";
     ndg.inputs.nixpkgs.follows = "nixpkgs";
 
-    nix2container.url = "github:nlewo/nix2container";
+    # TODO: revert to github:nlewo/nix2container once issue #185 is fixed
+    nix2container.url = "github:cameronraysmith/nix2container/185-skopeo-fix";
     nix2container.inputs.nixpkgs.follows = "nixpkgs";
   };
 
