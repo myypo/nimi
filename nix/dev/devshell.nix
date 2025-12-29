@@ -27,6 +27,8 @@
           rustfmt
           clippy
 
+          podman
+
           (lib.optional (!stdenv.isDarwin) moldHook)
         ];
       };
