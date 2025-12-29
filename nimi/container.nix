@@ -5,9 +5,13 @@ in
 {
   options.settings.container = mkOption {
     description = ''
-      Configures nimi container generation
+      Configures nimi's builtin container generation.
 
-      Mostly mappings to `nix2container` args
+      Note that none of these options will have any effect unless you are using
+      `nimi.mkContainerImage` to build your containers.
+
+      These are mappings to [`nix2container`'s `buildImage`](https://github.com/nlewo/nix2container?tab=readme-ov-file#nix2containerbuildimage) function, please
+      check there for further documentation.
     '';
     type = types.submodule {
       options = {
@@ -16,12 +20,14 @@ in
             The name of the generated image
           '';
           type = types.str;
+          default = "nimi-container";
         };
         tag = mkOption {
           description = ''
             The tag for the generated image to use
           '';
-          type = types.nullOr types.tag;
+          type = types.nullOr types.str;
+          default = null;
         };
         copyToRoot = mkOption {
           description = ''
@@ -34,6 +40,7 @@ in
             coreutils in the image `/bin`:
           '';
           type = types.either types.pathInStore (types.listOf types.pathInStore);
+          default = [ ];
         };
         fromImage = mkOption {
           description = ''
@@ -41,7 +48,8 @@ in
 
             Use `nix2container.pullImage` or `nix2container.pullImageFromManifest` to supply this.
           '';
-          type = types.pathInStore;
+          type = types.nullOr types.pathInStore;
+          default = null;
         };
         maxLayers = mkOption {
           description = ''
@@ -52,31 +60,35 @@ in
             Note this is applied on the image layers and not on layers added with the `buildImage.layers` attribute.
           '';
           type = types.ints.positive;
+          default = 1;
         };
         perms = mkOption {
           description = ''
             A list of file permisssions which are set when the tar layer is created: these permissions are not written to the Nix store.
           '';
-          type = types.listOf types.submodule {
-            path = mkOption {
-              description = ''
-                The store path to search for files in
-              '';
-              type = types.pathInStore;
-            };
-            regex = mkOption {
-              description = ''
-                All files matching this regex inside of `path` are selected
-              '';
-              type = types.str;
-            };
-            mode = mkOption {
-              description = ''
-                Actual mode to apply
-              '';
-              type = types.str;
-            };
-          };
+          type = types.listOf (
+            types.submodule {
+              path = mkOption {
+                description = ''
+                  The store path to search for files in
+                '';
+                type = types.pathInStore;
+              };
+              regex = mkOption {
+                description = ''
+                  All files matching this regex inside of `path` are selected
+                '';
+                type = types.str;
+              };
+              mode = mkOption {
+                description = ''
+                  Actual mode to apply
+                '';
+                type = types.str;
+              };
+            }
+          );
+          default = [ ];
         };
         initializeNixDatabase = mkOption {
           description = ''
@@ -86,6 +98,7 @@ in
             for instance to build an image used by a CI to run Nix builds.
           '';
           type = types.bool;
+          default = false;
         };
         layers = mkOption {
           description = ''
@@ -96,7 +109,8 @@ in
             This is pretty useful to isolate store paths that are often updated from more stable store paths,
             to speed up build and push time.
           '';
-          type = types.pathInStore;
+          type = types.listOf types.pathInStore;
+          default = [ ];
         };
       };
     };
