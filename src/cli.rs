@@ -84,17 +84,21 @@ impl Cli {
 
         match self.command {
             Command::Validate => {
-                info!("successfully validated nimi config");
+                info!("Successfully validated nimi config");
 
                 Ok(())
             }
             Command::Run => {
-                info!("launching process runner");
+                info!("Launching process manager...");
 
-                ProcessManager::new(config.services)
+                ProcessManager::new(config.services, config.settings)
                     .run()
                     .await
-                    .wrap_err("Failed to run processes")
+                    .wrap_err("Failed to run processes")?;
+
+                info!("Process manager finished");
+
+                Ok(())
             }
         }
     }

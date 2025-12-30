@@ -1,11 +1,10 @@
 {
   flake-parts-lib,
   inputs,
+  lib,
   ...
 }:
 let
-  inherit (inputs) nixpkgs;
-  inherit (nixpkgs) lib;
   inherit (flake-parts-lib) mkPerSystemOption;
   inherit (lib) mkOption types;
 in
@@ -23,29 +22,6 @@ in
     { self', pkgs, ... }:
     let
       inherit (pkgs) lib;
-
-      nimiModule = {
-        options.services = mkOption {
-          description = ''
-            Services to run inside the nimi runtime
-          '';
-          type = types.attrsOf (
-            types.submoduleWith {
-              class = "service";
-              modules = [
-                (lib.modules.importApply "${inputs.nixpkgs}/nixos/modules/system/service/portable/service.nix" {
-                  inherit pkgs;
-                })
-              ];
-              specialArgs = {
-                inherit pkgs;
-              };
-            }
-          );
-          default = { };
-          visible = "shallow";
-        };
-      };
     in
     {
       evalServicesConfig =
@@ -53,9 +29,10 @@ in
         let
           evaluatedConfig = lib.evalModules {
             modules = [
-              nimiModule
+              (lib.modules.importApply ./_nimi-module.nix { inherit (inputs) nixpkgs; })
               module
             ];
+            specialArgs = { inherit pkgs; };
             class = "service";
           };
 
