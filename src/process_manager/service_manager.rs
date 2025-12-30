@@ -7,23 +7,21 @@ use std::{path::PathBuf, process::Stdio, sync::Arc};
 
 use eyre::{Context, Result};
 use log::{debug, info};
-use tokio::{
-    process::{Child, Command},
-    sync::broadcast,
-};
+use tokio::process::{Child, Command};
 
 pub mod config_dir;
 pub mod logger;
 
 pub use config_dir::ConfigDir;
 pub use logger::Logger;
+use tokio_util::sync::CancellationToken;
 
 use crate::process_manager::{Service, Settings, settings::RestartMode};
 
 /// Responsible for the running of and managing of service state
 pub struct ServiceManager<'a> {
     settings: Arc<Settings>,
-    shutdown_rx: broadcast::Receiver<()>,
+    cancel_tok: CancellationToken,
 
     name: &'a str,
     service: Service,
@@ -45,13 +43,13 @@ impl<'a> ServiceManager<'a> {
         settings: Arc<Settings>,
         name: &'a str,
         service: Service,
-        shutdown_rx: broadcast::Receiver<()>,
+        cancel_tok: CancellationToken,
     ) -> Result<Self> {
         Ok(Self {
             config_dir: ConfigDir::new(&tmp_dir, &service.config_data).await?,
 
             settings,
-            shutdown_rx,
+            cancel_tok,
 
             name,
             service,
@@ -98,7 +96,7 @@ impl<'a> ServiceManager<'a> {
 
             tokio::select! {
                 _ = tokio::time::sleep(self.settings.restart.time) => {},
-                _ = self.shutdown_rx.recv() => {
+                _ = self.cancel_tok.cancelled() => {
                     info!("Received shutdown during restart delay for {}", self.name);
                     break;
                 }
@@ -119,7 +117,7 @@ impl<'a> ServiceManager<'a> {
         Logger::Stderr.start(Arc::from(self.name), &mut process.stderr)?;
 
         tokio::select! {
-            _ = self.shutdown_rx.recv() => {
+            _ = self.cancel_tok.cancelled() => {
                 debug!(target: self.name, "Received shutdown signal");
                 process.kill().await.wrap_err("Failed to kill service process")?;
                 return Ok(());

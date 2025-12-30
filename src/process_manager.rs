@@ -6,7 +6,8 @@
 use eyre::{Context, Result};
 use log::{debug, error, info};
 use std::{collections::HashMap, env, sync::Arc};
-use tokio::{process::Command, sync::broadcast};
+use tokio::process::Command;
+use tokio_util::sync::CancellationToken;
 
 pub mod service;
 pub mod service_manager;
@@ -58,7 +59,7 @@ impl ProcessManager {
             Self::run_startup_process(startup).await?;
         }
 
-        let (shutdown_tx, _) = broadcast::channel::<()>(1);
+        let cancel_tok = CancellationToken::new();
 
         let settings = Arc::new(self.settings);
         let tmp_dir = Arc::new(env::temp_dir());
@@ -66,15 +67,16 @@ impl ProcessManager {
         let mut join_set = tokio::task::JoinSet::new();
 
         for (name, service) in self.services {
-            let shutdown_rx = shutdown_tx.subscribe();
+            let cancel_tok = cancel_tok.clone();
             let settings = Arc::clone(&settings);
             let tmp_dir = Arc::clone(&tmp_dir);
 
             join_set.spawn(async move {
-                ServiceManager::new(tmp_dir, settings, &name, service, shutdown_rx)
+                ServiceManager::new(tmp_dir, settings, &name, service, cancel_tok)
                     .await?
                     .run()
                     .await
+                    .wrap_err_with(|| format!("Process {} had an error", name))
             });
         }
 
@@ -86,7 +88,7 @@ impl ProcessManager {
                 shutdown = &mut shutdown_signal => {
                     shutdown.wrap_err("Failed to listen for shutdown event")?;
                     info!("Shutting down...");
-                    let _ = shutdown_tx.send(());
+                    cancel_tok.cancel();
                     break;
                 }
                 result = join_set.join_next() => {
@@ -98,13 +100,13 @@ impl ProcessManager {
                         }
                         Some(Ok(Err(err))) => {
                             info!("Shutting down...");
-                            let _ = shutdown_tx.send(());
+                            cancel_tok.cancel();
                             while join_set.join_next().await.is_some() {}
                             return Err(err).wrap_err("Process failed");
                         }
                         Some(Err(err)) => {
                             info!("Shutting down...");
-                            let _ = shutdown_tx.send(());
+                            cancel_tok.cancel();
                             while join_set.join_next().await.is_some() {}
                             return Err(err).wrap_err("Process task panicked");
                         }
