@@ -3,10 +3,9 @@
 //! Can take a rust represntation of some `NixOS` modular services
 //! and runs them streaming logs back to the original console.
 
-use crate::error::Result;
-
 use console::style;
-use std::fmt::Display;
+use eyre::{Context, Result};
+use std::{collections::HashMap, fmt::Display};
 use tokio::sync::broadcast;
 
 mod service;
@@ -19,12 +18,12 @@ const ANSI_ORANGE: u8 = 208;
 ///
 /// Responsible for starting the services and streaming their outputs to the console
 pub struct ProcessManager {
-    services: Vec<Service>,
+    services: HashMap<String, Service>,
 }
 
 impl ProcessManager {
     /// Create a new process manager instance
-    pub fn new(services: Vec<Service>) -> Self {
+    pub fn new(services: HashMap<String, Service>) -> Self {
         Self { services }
     }
 
@@ -44,13 +43,15 @@ impl ProcessManager {
         let handles: Vec<_> = self
             .services
             .into_iter()
-            .map(|service| {
+            .map(|(name, service)| {
                 let shutdown_rx = shutdown_tx.subscribe();
-                tokio::spawn(async move { service.run(shutdown_rx).await })
+                tokio::spawn(async move { service.run(&name, 24, shutdown_rx).await })
             })
             .collect();
 
-        tokio::signal::ctrl_c().await?;
+        tokio::signal::ctrl_c()
+            .await
+            .wrap_err("Failed to listen for shutdown event")?;
         Self::print_manager_message("Shutting down...");
 
         let _ = shutdown_tx.send(());

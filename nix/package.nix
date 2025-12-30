@@ -4,13 +4,21 @@ let
 in
 {
   perSystem =
-    { pkgs, ... }:
+    { pkgs, config, ... }:
     rec {
       packages.nimi = pkgs.rustPlatform.buildRustPackage (_finalAttrs: {
         pname = cargoToml.package.name;
         inherit (cargoToml.package) version;
 
-        src = self;
+        src = lib.sources.cleanSourceWith {
+          src = self;
+          filter =
+            path: _type:
+            let
+              rel = lib.removePrefix (toString self + "/") (toString path);
+            in
+            rel == "Cargo.toml" || rel == "Cargo.lock" || rel == "src" || lib.hasPrefix "src/" rel;
+        };
 
         cargoLock = {
           lockFile = "${self}/Cargo.lock";
@@ -30,6 +38,10 @@ in
           license = lib.licenses.mit;
           maintainers = [ lib.maintainers.baileylu ];
           mainProgram = "nimi";
+        };
+
+        passthru = {
+          inherit (config) evalServicesConfig;
         };
       });
 

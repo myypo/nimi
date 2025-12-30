@@ -2,52 +2,19 @@
 
 //! [`Tini`](https://github.com/krallin/tini)-like PID 1 for containers and target for [NixOS modular services](https://nixos.org/manual/nixos/unstable/#modular-services).
 
-use clap::{Parser, command};
+use clap::Parser;
+use eyre::{Context, Result};
 
-pub use crate::error::{Error, Result};
-use crate::process_manager::{ProcessManager, Service};
+use crate::cli::Cli;
 
-pub mod error;
+pub mod cli;
+pub mod config;
 pub mod process_manager;
-
-/// NixOS modular services runner and container init
-///
-/// # Examples
-///
-/// ```bash
-/// nimi nixpkgs#ghostunnel .#my-pkg-with-service
-/// ```
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-struct Args {
-    /// Flake references to packages with `passthru.services` defined
-    services: Vec<String>,
-}
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let manager = ProcessManager::new(vec![
-        Service {
-            name: "HTTP Server".to_string(),
-            argv: vec![
-                "nix".to_string(),
-                "run".to_string(),
-                "nixpkgs#http-server".to_string(),
-            ],
-            output_color: 24,
-            ..Default::default()
-        },
-        Service {
-            name: "HTTP Server 2".to_string(),
-            argv: vec![
-                "nix".to_string(),
-                "run".to_string(),
-                "nixpkgs#http-server".to_string(),
-            ],
-            output_color: 104,
-            ..Default::default()
-        },
-    ]);
+    color_eyre::install().wrap_err("Failed to setup color_eyre")?;
+    env_logger::try_init().wrap_err("Failed to setup env_logger")?;
 
-    manager.run().await
+    Cli::parse().run().await.wrap_err("Failed to run nimi CLI")
 }
