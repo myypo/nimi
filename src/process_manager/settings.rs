@@ -1,3 +1,7 @@
+//! Nimi Process manager settings
+//!
+//! Holds data about the nix configurable settings for Nimi
+
 use serde_with::DurationMilliSeconds;
 use std::time::Duration;
 
@@ -32,9 +36,15 @@ pub struct Startup {
 #[serde_as]
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Restart {
+    /// The mode to use for restarts
     pub mode: RestartMode,
+
+    /// The amount of time (in milliseconds) to wait before
+    /// restarting the process
     #[serde_as(as = "DurationMilliSeconds<u64>")]
     pub time: Duration,
+
+    /// The maximum amount of restarts in `RestartMode::UpToCount`
     pub count: usize,
 }
 
@@ -43,11 +53,16 @@ pub struct Restart {
 /// Selects how the processes get restarted on failure
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub enum RestartMode {
+    /// Don't restart, ever
     #[default]
     #[serde(rename = "never")]
     Never,
+
+    /// Restart a given number of times
     #[serde(rename = "up-to-count")]
     UpToCount,
+
+    /// Restart every single time
     #[serde(rename = "always")]
     Always,
 }

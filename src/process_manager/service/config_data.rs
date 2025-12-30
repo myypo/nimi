@@ -2,6 +2,7 @@ use std::{collections::HashMap, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 
+/// Convenience type for the map of config data
 pub type ConfigDataMap = HashMap<String, ConfigData>;
 
 #[derive(Debug, Serialize, Deserialize)]

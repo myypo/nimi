@@ -8,14 +8,13 @@ use log::{debug, error, info};
 use std::{collections::HashMap, env, sync::Arc};
 use tokio::{process::Command, sync::broadcast};
 
-mod service;
-mod service_manager;
-mod settings;
+pub mod service;
+pub mod service_manager;
+pub mod settings;
 
 pub use service::Service;
+pub use service_manager::ServiceManager;
 pub use settings::Settings;
-
-use crate::process_manager::service_manager::ServiceManager;
 
 /// Process Manager Struct
 ///

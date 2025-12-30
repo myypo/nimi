@@ -1,3 +1,7 @@
+//! Config Directory Module
+//!
+//! Handles creating the configuration directory
+
 use eyre::{Context, Result};
 use sha2::{Digest, Sha256};
 use std::{ffi::OsStr, io::ErrorKind, path::PathBuf};
@@ -5,9 +9,17 @@ use tokio::fs;
 
 use crate::process_manager::service::ConfigDataMap;
 
+/// Configuration directory struct
+///
+/// Generates a reusable per service temp dir using a hash of the
+/// configuration data
 pub struct ConfigDir(PathBuf);
 
 impl ConfigDir {
+    /// Create a new configuration directory
+    ///
+    /// Writes the configuration to disk inside the passed tempdir with
+    /// the configured files
     pub async fn new(tmp_dir: PathBuf, config_data: &ConfigDataMap) -> Result<Self> {
         let dir_name = Self::generate_config_directory_name(config_data)
             .wrap_err("Failed to generate config directory name")?;
@@ -32,6 +44,8 @@ impl ConfigDir {
         Ok(Self(cfg_dir_path))
     }
 
+    /// Generate a name for the config dir by using an Sha256 hash of
+    /// the contents
     pub fn generate_config_directory_name(config_data: &ConfigDataMap) -> Result<String> {
         let bytes = serde_json::to_vec(&config_data).wrap_err_with(|| {
             format!(

@@ -1,3 +1,7 @@
+//! Module for data representation of the service
+//!
+//! Singly handles (de)serialization of the service data to/from the nix type
+
 use serde::{Deserialize, Serialize};
 
 mod config_data;

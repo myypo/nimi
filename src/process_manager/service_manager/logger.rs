@@ -1,15 +1,26 @@
+//! Service Manager Loggers
+//!
+//! Reads the logs from the sub processes and prints them from the `Nimi` instance
+
 use std::sync::Arc;
 
 use eyre::{Context, ContextCompat, Result};
 use log::{debug, error};
 use tokio::io::{AsyncBufReadExt, AsyncRead, BufReader, Lines};
 
+/// Logger type
+///
+/// Formats the logs differently based on if they are intended for stdout or stderr
 pub enum Logger {
+    /// Regular process logs
     Stdout,
+
+    /// Process error logs
     Stderr,
 }
 
 impl Logger {
+    /// Start a logger for a given file descriptor
     pub fn start<D>(self, target: Arc<str>, fd: &mut Option<D>) -> Result<()>
     where
         D: AsyncRead + Unpin + Send + 'static,
