@@ -1,6 +1,7 @@
 use eyre::{Context, ContextCompat, Result, eyre};
 use log::{debug, error};
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use std::{collections::HashMap, env, path::PathBuf, process::Stdio};
 use tokio::{
     fs,
@@ -31,10 +32,22 @@ pub struct Service {
 
 impl Service {
     async fn create_config_directory(&self) -> Result<PathBuf> {
-        let dir = env::temp_dir();
+        let bytes = serde_json::to_vec(&self.config_data)
+            .wrap_err("Failed to serialize config data files to bytes")?;
+        let digest = Sha256::digest(&bytes);
+
+        let dir_name = format!("nimi-config-{:x}", digest);
+        let tmp = env::temp_dir();
+        let tmp_subdir = tmp.join(&dir_name);
+
+        if fs::try_exists(&tmp_subdir).await? {
+            return Ok(tmp_subdir);
+        }
+
+        fs::create_dir(&tmp_subdir).await?;
 
         for cfg in self.config_data.values() {
-            let out_location = dir.join(&cfg.path);
+            let out_location = tmp_subdir.join(&cfg.path);
             fs::symlink(&cfg.source, out_location)
                 .await
                 .wrap_err_with(|| {
@@ -42,7 +55,7 @@ impl Service {
                 })?;
         }
 
-        Ok(dir)
+        Ok(tmp_subdir)
     }
 
     async fn spawn_process(&self) -> Result<Child> {
