@@ -18,6 +18,9 @@ pub struct Settings {
 
     /// The startup specific settings
     pub startup: Startup,
+
+    /// The logging specific settings
+    pub logging: Logging,
 }
 
 /// Startup Settings Struct
@@ -28,6 +31,20 @@ pub struct Startup {
     /// Binary to run on startup before starting services
     #[serde(rename = "runOnStartup")]
     pub run_on_startup: Option<String>,
+}
+
+/// Logging Settings Struct
+///
+/// Configuration for how nimi prints logs
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct Logging {
+    /// If log files should be generated for the service
+    #[serde(rename = "enableLogFiles")]
+    pub enable_log_files: bool,
+
+    /// The stringified path to the logs directory to use
+    #[serde(rename = "logsDir")]
+    pub logs_dir: String,
 }
 
 /// Restart Settings Struct
