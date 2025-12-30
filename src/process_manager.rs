@@ -6,7 +6,7 @@
 use eyre::{Context, Result};
 use log::{debug, error, info};
 use std::{collections::HashMap, env, sync::Arc};
-use tokio::process::Command;
+use tokio::{process::Command, task::JoinSet};
 use tokio_util::sync::CancellationToken;
 
 pub mod service;
@@ -48,26 +48,21 @@ impl ProcessManager {
         Ok(())
     }
 
-    /// Run the services defined for the process manager instance
+    /// Spawn Child Processes
     ///
-    /// Terminates on `Ctrl-C`
-    pub async fn run(self) -> Result<()> {
-        info!("Starting process manager...");
-
-        if let Some(startup) = &self.settings.startup.run_on_startup {
-            info!("Running startup binary...");
-            Self::run_startup_process(startup).await?;
-        }
-
-        let cancel_tok = CancellationToken::new();
+    /// Spawns every service this process manager manages into a `JoinSet`
+    pub fn spawn_child_processes(
+        self,
+        cancel_tok: &CancellationToken,
+    ) -> Result<JoinSet<Result<()>>> {
+        let mut join_set = tokio::task::JoinSet::new();
 
         let settings = Arc::new(self.settings);
         let tmp_dir = Arc::new(env::temp_dir());
 
-        let mut join_set = tokio::task::JoinSet::new();
-
         for (name, service) in self.services {
             let cancel_tok = cancel_tok.clone();
+
             let settings = Arc::clone(&settings);
             let tmp_dir = Arc::clone(&tmp_dir);
 
@@ -80,45 +75,44 @@ impl ProcessManager {
             });
         }
 
-        let shutdown_signal = tokio::signal::ctrl_c();
-        tokio::pin!(shutdown_signal);
+        Ok(join_set)
+    }
 
-        loop {
-            tokio::select! {
-                shutdown = &mut shutdown_signal => {
-                    shutdown.wrap_err("Failed to listen for shutdown event")?;
-                    info!("Shutting down...");
-                    cancel_tok.cancel();
-                    break;
-                }
-                result = join_set.join_next() => {
-                    match result {
-                        Some(Ok(Ok(()))) => {
-                            if join_set.is_empty() {
-                                return Ok(());
-                            }
-                        }
-                        Some(Ok(Err(err))) => {
-                            info!("Shutting down...");
-                            cancel_tok.cancel();
-                            while join_set.join_next().await.is_some() {}
-                            return Err(err).wrap_err("Process failed");
-                        }
-                        Some(Err(err)) => {
-                            info!("Shutting down...");
-                            cancel_tok.cancel();
-                            while join_set.join_next().await.is_some() {}
-                            return Err(err).wrap_err("Process task panicked");
-                        }
-                        None => return Ok(()),
-                    }
-                }
+    fn spawn_shutdown_task(&self, cancel_tok: &CancellationToken) {
+        let token = cancel_tok.clone();
+        tokio::spawn(async move {
+            tokio::signal::ctrl_c().await?;
+            token.cancel();
+            Ok::<_, eyre::Report>(())
+        });
+    }
+
+    /// Run the services defined for the process manager instance
+    ///
+    /// Terminates on `Ctrl-C`
+    pub async fn run(self) -> Result<()> {
+        info!("Starting process manager...");
+
+        if let Some(startup) = &self.settings.startup.run_on_startup {
+            info!("Running startup binary...");
+            Self::run_startup_process(startup).await?;
+        }
+
+        let cancel_tok = CancellationToken::new();
+        self.spawn_shutdown_task(&cancel_tok);
+
+        let mut services_set = self.spawn_child_processes(&cancel_tok)?;
+
+        while let Some(res) = services_set.join_next().await {
+            let flat: Result<()> = res.map_err(Into::into).and_then(std::convert::identity);
+
+            if let Err(e) = flat {
+                cancel_tok.cancel();
+                return Err(e);
             }
         }
 
-        while join_set.join_next().await.is_some() {}
-
-        info!("Finished shutdown");
+        info!("Shutting down process manager...");
 
         Ok(())
     }
