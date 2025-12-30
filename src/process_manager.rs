@@ -5,7 +5,7 @@
 
 use eyre::{Context, Result};
 use log::{debug, error, info};
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, env, sync::Arc};
 use tokio::{process::Command, sync::broadcast};
 
 mod service;
@@ -70,7 +70,8 @@ impl ProcessManager {
             let settings = Arc::clone(&settings);
 
             join_set.spawn(async move {
-                ServiceManager::new(settings, &name, service, shutdown_rx)
+                ServiceManager::new(env::temp_dir(), settings, &name, service, shutdown_rx)
+                    .await?
                     .run()
                     .await
             });

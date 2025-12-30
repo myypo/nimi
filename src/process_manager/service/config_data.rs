@@ -1,6 +1,8 @@
-use std::path::PathBuf;
+use std::{collections::HashMap, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
+
+pub type ConfigDataMap = HashMap<String, ConfigData>;
 
 #[derive(Debug, Serialize, Deserialize)]
 /// Service confguration data
