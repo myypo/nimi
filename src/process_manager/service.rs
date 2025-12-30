@@ -107,8 +107,6 @@ impl Service {
                     debug!(target: name, "Received shutdown signal");
                     process.kill().await.wrap_err("Failed to kill service process")?;
 
-                    process.wait().await?;
-
                     return Ok(());
                 }
                 line = stdout_reader.next_line() => {
