@@ -3,12 +3,12 @@
 //! Can take a rust represntation of some `NixOS` modular services
 //! and runs them streaming logs back to the original console.
 
-use eyre::{Context, Result};
+use eyre::{Context, Result, eyre};
 use futures::future::OptionFuture;
 use log::{debug, error, info};
 use std::{collections::HashMap, env, io::ErrorKind, path::PathBuf, sync::Arc};
+use tokio::signal::unix::{SignalKind, signal};
 use tokio::{fs, process::Command, task::JoinSet};
-use tokio::signal::unix::{signal, SignalKind};
 use tokio_util::sync::CancellationToken;
 
 pub mod service;
@@ -47,6 +47,13 @@ impl ProcessManager {
         let stderr = str::from_utf8(&output.stderr)?;
         if !stderr.is_empty() {
             error!(target: bin, "{}", stderr);
+        }
+
+        if !output.status.success() {
+            return Err(eyre!(
+                "Startup process exited with non-zero exit code: {}",
+                output.status
+            ));
         }
 
         Ok(())
