@@ -47,11 +47,15 @@ impl ConfigDir {
                 Err(e) => return Err(e).wrap_err("Failed to create config file parent dir"),
             }
 
-            fs::symlink(&cfg.source, out_location)
-                .await
-                .wrap_err_with(|| {
-                    format!("Failed to create symlink for config file: {:?}", cfg.path)
-                })?;
+            match fs::symlink(&cfg.source, out_location).await {
+                Ok(()) => {}
+                Err(e) if e.kind() == ErrorKind::AlreadyExists => {}
+                Err(e) => {
+                    return Err(e).wrap_err_with(|| {
+                        format!("Failed to create symlink for config file: {:?}", cfg.path)
+                    });
+                }
+            }
         }
 
         Ok(Self(cfg_dir_path))
