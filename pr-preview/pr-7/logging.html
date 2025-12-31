@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Config Data Files</title>
+    <title>Logging</title>
      
     <script>
       // Apply sidebar state immediately to prevent flash
@@ -82,29 +82,40 @@
             <summary>Contents</summary>
             <div class="sidebar-section-content">
               <ul class="toc-list">
-                <li><a href="#config-data-files">Config Data Files</a>
+                <li><a href="#logging">Logging</a>
+<li><a href="#file-layout">File layout</a>
+<li><a href="#configuration">Configuration</a>
+<li><a href="#notes">Notes</a>
 </li>
               </ul>
             </div>
           </details>
         </nav>
 
-        <main class="content"><html><head></head><body><h1 id="config-data-files">Config Data Files</h1>
-<p><code>configData</code> lets modular service modules supply config files to a service
-instance. <code>Nimi</code> treats the entries in the generated JSON as the final, resolved
-files to expose.</p>
-<p>At runtime, for each service:</p>
+        <main class="content"><html><head></head><body><h1 id="logging">Logging</h1>
+<p><code>Nimi</code> streams service logs to <code>stdout</code>/<code>stderr</code> and can also write per-service log
+files when <code>settings.logging.enable</code> is set.</p>
+<h1 id="file-layout">File layout</h1>
+<p>When logging is enabled, <code>Nimi</code> creates a run-specific directory under
+<code>settings.logging.logsDir</code> and writes one file per service:</p>
 <ul>
-<li><code>Nimi</code> serializes the service's <code>configData</code> entries, hashes them, and creates a
-temp directory (usually under <code>/tmp</code>) named <code>nimi-config-&lt;sha256&gt;</code>.</li>
-<li>Each <code>configData.&lt;name&gt;.source</code> is symlinked into that directory at the
-relative <code>configData.&lt;name&gt;.path</code> location.</li>
-<li>The service is started with <code>XDG_CONFIG_HOME</code> set to the temp directory, so it
-can read config files at <code>$XDG_CONFIG_HOME/&lt;path&gt;</code>.</li>
+<li><code>logs-{n}/service-a.txt</code></li>
+<li><code>logs-{n}/service-b.txt</code></li>
 </ul>
-<p><code>Nimi</code> does not render <code>configData.&lt;name&gt;.text</code> itself; the Nix evaluation/build
-step generates the <code>source</code> files and the JSON points at them. Hence, updating the content
-requires rebuilding the config and restarting <code>Nimi</code>.</p>
+<blockquote>
+<p>Where <code>n</code> is the successive iteration ran using the same logging directory</p>
+</blockquote>
+<p>Each file receives line-oriented output from the service. Both <code>stdout</code> and
+<code>stderr</code> are appended to the same file, so the contents reflect the combined
+stream.</p>
+<h1 id="configuration">Configuration</h1>
+<pre class="highlight"><code class="language-nix"><span style="color:rgb(171,178,191);">settings</span><span style="color:rgb(132,139,152);">.</span><span style="color:rgb(97,175,239);">logging</span>&nbsp;<span style="color:rgb(171,178,191);">=</span>&nbsp;<span style="color:rgb(132,139,152);">{</span><br>&nbsp;&nbsp;<span style="color:rgb(86,182,194);">enable</span>&nbsp;<span style="color:rgb(171,178,191);">=</span>&nbsp;<span style="color:rgb(209,154,102);">true</span><span style="color:rgb(132,139,152);">;</span><br>&nbsp;&nbsp;<span style="color:rgb(86,182,194);">logsDir</span>&nbsp;<span style="color:rgb(171,178,191);">=</span>&nbsp;<span style="color:rgb(152,195,121);">"</span><span style="color:rgb(152,195,121);">my_logs</span><span style="color:rgb(152,195,121);">"</span><span style="color:rgb(132,139,152);">;</span><br><span style="color:rgb(132,139,152);">}</span><span style="color:rgb(132,139,152);">;</span><br></code></pre>
+<h1 id="notes">Notes</h1>
+<ul>
+<li>Log files are created at runtime; they do not exist in the Nix store.</li>
+<li>Disabling logging still streams logs to stdout/stderr, but no files are
+created.</li>
+</ul>
 </body></html></main>
       </div>
 
@@ -112,7 +123,10 @@ requires rebuilding the config and restarting <code>Nimi</code>.</p>
         <nav class="page-toc-nav">
           <h3>On this page</h3>
           <ul class="page-toc-list">
-            <li><a href="#config-data-files">Config Data Files</a>
+            <li><a href="#logging">Logging</a>
+<li><a href="#file-layout">File layout</a>
+<li><a href="#configuration">Configuration</a>
+<li><a href="#notes">Notes</a>
 </li>
           </ul>
         </nav>
