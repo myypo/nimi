@@ -2,7 +2,7 @@
 //!
 //! Handles creating the configuration directory
 
-use eyre::{Context, Result};
+use eyre::{Context, OptionExt, Result};
 use sha2::{Digest, Sha256};
 use std::{
     ffi::OsStr,
@@ -30,18 +30,23 @@ impl ConfigDir {
 
         let cfg_dir_path = tmp_dir.join(&dir_name);
 
-        match fs::create_dir_all(&cfg_dir_path).await {
-            Ok(()) => {}
-            Err(e) if e.kind() == ErrorKind::AlreadyExists => return Ok(Self(cfg_dir_path)),
-            Err(e) => return Err(e).wrap_err("Failed to create config dir"),
-        }
-
         for cfg in config_data.values() {
             if !cfg.enable {
                 continue;
             }
 
             let out_location = cfg_dir_path.join(&cfg.path);
+
+            let parent_dir = out_location
+                .parent()
+                .ok_or_eyre("No parent directory exists for config file")?;
+
+            match fs::create_dir_all(parent_dir).await {
+                Ok(()) => {}
+                Err(e) if e.kind() == ErrorKind::AlreadyExists => {}
+                Err(e) => return Err(e).wrap_err("Failed to create config file parent dir"),
+            }
+
             fs::symlink(&cfg.source, out_location)
                 .await
                 .wrap_err_with(|| {
