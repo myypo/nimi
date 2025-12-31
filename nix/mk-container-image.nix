@@ -29,7 +29,7 @@ in
           settings = evaluatedConfig.config.settings.container;
 
           cleanedSettings =
-            if settings.fromImage == null then builtins.removeAttrs settings [ "fromImage" ] else settings;
+            if settings.fromImage == null then removeAttrs settings [ "fromImage" ] else settings;
         in
         inputs'.nix2container.packages.nix2container.buildImage (
           {
