@@ -2,7 +2,10 @@
 //!
 //! Reads the logs from the sub processes and prints them from the `Nimi` instance
 
-use std::{path::PathBuf, sync::Arc};
+use std::{
+    path::{Path, PathBuf},
+    sync::Arc,
+};
 
 use eyre::{Context, ContextCompat, Result};
 use log::{debug, error};
@@ -35,28 +38,16 @@ impl Logger {
     where
         D: AsyncRead + Unpin + Send + 'static,
     {
-        let mut reader = Self::get_lines_reader(fd)
+        let reader = Self::get_lines_reader(fd)
             .wrap_err("Failed to acquire lines reader for stdout logger")?;
 
         set.spawn(async move {
-            let mut logs_file = Self::create_logs_file(logs_dir, &target).await?;
-
-            loop {
-                match reader.next_line().await {
-                    Ok(Some(line)) => {
-                        self.log_line(&target, &line);
-                        Self::write_log_file_line(&mut logs_file, &line).await?;
-                    }
-                    Ok(None) => break,
-                    Err(e) => {
-                        error!(target: &target, "{}", e);
-                        Self::write_log_file_line(&mut logs_file, e.to_string().as_str()).await?;
-                        break;
-                    }
-                }
+            if let Some(ref logs_dir) = *logs_dir {
+                self.write_logs_console_and_file(reader, &target, logs_dir)
+                    .await?;
+            } else {
+                self.write_logs_console_only(reader, &target).await
             }
-
-            Self::flush_log_file(&mut logs_file).await?;
 
             Ok::<_, eyre::Report>(())
         });
@@ -64,14 +55,54 @@ impl Logger {
         Ok(())
     }
 
-    async fn create_logs_file(
-        logs_dir: Arc<Option<PathBuf>>,
-        target: &Arc<String>,
-    ) -> Result<Option<BufWriter<File>>> {
-        let Some(ref logs_dir) = *logs_dir else {
-            return Ok(None);
-        };
+    async fn write_logs_console_only<D>(&self, mut reader: Lines<BufReader<D>>, target: &str)
+    where
+        D: AsyncRead + Unpin + Send + 'static,
+    {
+        loop {
+            match reader.next_line().await {
+                Ok(Some(line)) => {
+                    self.log_line(target, &line);
+                }
+                Ok(None) => break,
+                Err(e) => {
+                    error!(target: &target, "{}", e);
+                    break;
+                }
+            }
+        }
+    }
 
+    async fn write_logs_console_and_file<D>(
+        &self,
+        mut reader: Lines<BufReader<D>>,
+        target: &str,
+        logs_dir: &Path,
+    ) -> Result<()>
+    where
+        D: AsyncRead + Unpin + Send + 'static,
+    {
+        let mut logs_file = Self::create_logs_file(logs_dir, target).await?;
+
+        loop {
+            match reader.next_line().await {
+                Ok(Some(line)) => {
+                    self.log_line(target, &line);
+                    Self::write_log_file_line(&mut logs_file, &line).await?;
+                }
+                Ok(None) => break,
+                Err(e) => {
+                    error!(target: &target, "{}", e);
+                    Self::write_log_file_line(&mut logs_file, e.to_string().as_str()).await?;
+                    break;
+                }
+            }
+        }
+
+        Self::flush_log_file(&mut logs_file).await
+    }
+
+    async fn create_logs_file(logs_dir: &Path, target: &str) -> Result<BufWriter<File>> {
         let logs_path = logs_dir.join(format!("{}.txt", &target));
 
         let file = fs::OpenOptions::new()
@@ -82,25 +113,17 @@ impl Logger {
             .await
             .wrap_err_with(|| format!("Failed to create logs file for {}", &target))?;
 
-        Ok(Some(BufWriter::new(file)))
+        Ok(BufWriter::new(file))
     }
 
-    async fn write_log_file_line(writer: &mut Option<BufWriter<File>>, line: &str) -> Result<()> {
-        let Some(writer) = writer else {
-            return Ok(());
-        };
-
+    async fn write_log_file_line(writer: &mut BufWriter<File>, line: &str) -> Result<()> {
         writer.write_all(line.as_bytes()).await?;
         writer.write_all(b"\n").await?;
 
         Ok(())
     }
 
-    async fn flush_log_file(writer: &mut Option<BufWriter<File>>) -> Result<()> {
-        let Some(writer) = writer else {
-            return Ok(());
-        };
-
+    async fn flush_log_file(writer: &mut BufWriter<File>) -> Result<()> {
         writer.flush().await?;
 
         Ok(())
