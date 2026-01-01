@@ -61,3 +61,4 @@ nix run .#myNimiWrapper
 - Explore service definitions and compose them per environment.
 - Use restart policies to match reliability needs.
 - Add a startup hook for migrations, warm-ups, or one-time init tasks.
+- Integrate with Nix tooling: `docs/flake-module.md`, `docs/nixos-module.md`, and `docs/home-module.md`.
