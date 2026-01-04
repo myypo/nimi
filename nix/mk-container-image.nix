@@ -26,16 +26,18 @@ in
         let
           evaluatedConfig = config.evalNimiModule module;
 
-          settings = evaluatedConfig.config.settings.container;
-
-          cleanedSettings =
-            if settings.fromImage == null then removeAttrs settings [ "fromImage" ] else settings;
+          cleanedSettings = lib.pipe evaluatedConfig.config.settings.container [
+            (settings: if settings.fromImage == null then removeAttrs settings [ "fromImage" ] else settings)
+            (settings: removeAttrs settings [ "imageConfig" ])
+          ];
         in
         inputs'.nix2container.packages.nix2container.buildImage (
           {
-            config.entrypoint = [
-              (lib.getExe (config.mkNimiBin module))
-            ];
+            config = evaluatedConfig.config.settings.container.imageConfig // {
+              entrypoint = [
+                (lib.getExe (config.mkNimiBin module))
+              ];
+            };
           }
           // cleanedSettings
         );
