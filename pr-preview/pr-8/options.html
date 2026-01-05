@@ -90,6 +90,22 @@
   </li>
   
   <li>
+    <a href='#option-meta' title="meta">
+      meta
+      
+      
+    </a>
+  </li>
+  
+  <li>
+    <a href='#option-passthru' title="passthru">
+      passthru
+      
+      
+    </a>
+  </li>
+  
+  <li>
     <a href='#option-services' title="services">
       services
       
@@ -387,6 +403,49 @@ the <code class="nixos-option">nixpkgs.pkgs</code> option.</li>
 </body></html></div>
   <div class="option-declared">Declared in: <code><a href="https://github.com/NixOS/nixpkgs/blob/master/lib/modules.nix" target="_blank"><nixpkgs/lib/modules.nix></a></code></div>
 </div>
+<div class="option" id="option-meta">
+  <h3 class="option-name">
+    <a href="#option-meta" class="option-anchor">meta</a>
+    <span class="copy-link" title="Copy link to this option"></span>
+    <span class="copy-feedback">Link copied!</span>
+  </h3>
+  <div class="option-type">Type: <code>lazy attribute set of raw value</code></div>
+  <div class="option-description"><html><head></head><body><p><a href="https://ryantm.github.io/nixpkgs/stdenv/meta/"><code>meta</code></a> attributes to
+include in the output of generated <code>Nimi</code> packages</p>
+</body></html></div>
+  <div class="option-default">Default: <code>{ }</code></div>
+  <div class="option-example">Example: <pre><code>{
+  meta = {
+    description = "My cool nimi package";
+  };
+}
+</code></pre></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/meta.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/meta.nix</a></code></div>
+</div>
+<div class="option" id="option-passthru">
+  <h3 class="option-name">
+    <a href="#option-passthru" class="option-anchor">passthru</a>
+    <span class="copy-link" title="Copy link to this option"></span>
+    <span class="copy-feedback">Link copied!</span>
+  </h3>
+  <div class="option-type">Type: <code>lazy attribute set of raw value</code></div>
+  <div class="option-description"><html><head></head><body><p><a href="https://ryantm.github.io/nixpkgs/stdenv/stdenv/#var-stdenv-passthru"><code>passthru</code></a> attributes to
+include in the output of generated <code>Nimi</code> packages</p>
+</body></html></div>
+  <div class="option-default">Default: <code>{ }</code></div>
+  <div class="option-example">Example: <pre><code>{
+  passthru = {
+    doXYZ = pkgs.writeShellApplication {
+      name = "xyz-doer";
+      text = ''
+        xyz
+      '';
+    };
+  };
+}
+</code></pre></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/passthru.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/passthru.nix</a></code></div>
+</div>
 <div class="option" id="option-services">
   <h3 class="option-name">
     <a href="#option-services" class="option-anchor">services</a>
@@ -449,7 +508,7 @@ then overriding or extending its options.</p>
 check there for further documentation.</p>
 </body></html></div>
   <div class="option-default">Default: <code>{ }</code></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-container-copyToRoot">
   <h3 class="option-name">
@@ -466,7 +525,7 @@ be copied to the image root. For instance, to get bash and
 coreutils in the image <code>/bin</code>:</p>
 </body></html></div>
   <div class="option-default">Default: <code>[ ]</code></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-container-fromImage">
   <h3 class="option-name">
@@ -479,7 +538,7 @@ coreutils in the image <code>/bin</code>:</p>
 <p>Use <code>nix2container.pullImage</code> or <code>nix2container.pullImageFromManifest</code> to supply this.</p>
 </body></html></div>
   <div class="option-default">Default: <code>null</code></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-container-imageConfig">
   <h3 class="option-name">
@@ -491,7 +550,7 @@ coreutils in the image <code>/bin</code>:</p>
   <div class="option-description"><html><head></head><body><p>An attribute set describing an image configuration as defined in the <a href="https://github.com/opencontainers/image-spec/blob/8b9d41f48198a7d6d0a5c1a12dc2d1f7f47fc97f/specs-go/v1/config.go#L23">OCI image specification</a>.</p>
 </body></html></div>
   <div class="option-default">Default: <code>{ }</code></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-container-initializeNixDatabase">
   <h3 class="option-name">
@@ -505,7 +564,7 @@ coreutils in the image <code>/bin</code>:</p>
 for instance to build an image used by a CI to run Nix builds.</p>
 </body></html></div>
   <div class="option-default">Default: <code>false</code></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-container-layers">
   <h3 class="option-name">
@@ -520,7 +579,7 @@ for instance to build an image used by a CI to run Nix builds.</p>
 to speed up build and push time.</p>
 </body></html></div>
   <div class="option-default">Default: <code>[ ]</code></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-container-maxLayers">
   <h3 class="option-name">
@@ -534,7 +593,7 @@ to speed up build and push time.</p>
 <p>Note this is applied on the image layers and not on layers added with the <code>buildImage.layers</code> attribute.</p>
 </body></html></div>
   <div class="option-default">Default: <code>1</code></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-container-name">
   <h3 class="option-name">
@@ -546,7 +605,7 @@ to speed up build and push time.</p>
   <div class="option-description"><html><head></head><body><p>The name of the generated image</p>
 </body></html></div>
   <div class="option-default">Default: <code>"nimi-container"</code></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-container-perms">
   <h3 class="option-name">
@@ -558,7 +617,7 @@ to speed up build and push time.</p>
   <div class="option-description"><html><head></head><body><p>A list of file permisssions which are set when the tar layer is created: these permissions are not written to the Nix store.</p>
 </body></html></div>
   <div class="option-default">Default: <code>[ ]</code></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-container-tag">
   <h3 class="option-name">
@@ -570,7 +629,7 @@ to speed up build and push time.</p>
   <div class="option-description"><html><head></head><body><p>The tag for the generated image to use</p>
 </body></html></div>
   <div class="option-default">Default: <code>"latest"</code></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/container.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/container.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-logging">
   <h3 class="option-name">
@@ -594,7 +653,7 @@ execution order as best as possible.</p>
   logsDir = "my_logs";
 }
 </code></pre></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/logging.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/logging.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/logging.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/logging.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-logging-enable">
   <h3 class="option-name">
@@ -610,7 +669,7 @@ are created.
 </body></html></div>
   <div class="option-default">Default: <code>false</code></div>
   <div class="option-example">Example: <code>true</code></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/logging.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/logging.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/logging.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/logging.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-logging-logsDir">
   <h3 class="option-name">
@@ -624,7 +683,7 @@ are created.
 and writes one file per service.</p>
 </body></html></div>
   <div class="option-default">Default: <code>"nimi_logs"</code></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/logging.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/logging.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/logging.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/logging.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-restart">
   <h3 class="option-name">
@@ -648,7 +707,7 @@ production workloads usually benefit from a bounded or always-on policy.</p>
   count = 3;
 }
 </code></pre></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/restart.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/restart.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/restart.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/restart.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-restart-count">
   <h3 class="option-name">
@@ -663,7 +722,7 @@ intervene or change the configuration.</p>
 </body></html></div>
   <div class="option-default">Default: <code>5</code></div>
   <div class="option-example">Example: <code>3</code></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/restart.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/restart.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/restart.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/restart.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-restart-mode">
   <h3 class="option-name">
@@ -685,7 +744,7 @@ more than surfacing the failure.</p>
 </body></html></div>
   <div class="option-default">Default: <code>"always"</code></div>
   <div class="option-example">Example: <code>"up-to-count"</code></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/restart.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/restart.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/restart.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/restart.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-restart-time">
   <h3 class="option-name">
@@ -700,7 +759,7 @@ recover resources or for dependent services to come back.</p>
 </body></html></div>
   <div class="option-default">Default: <code>1000</code></div>
   <div class="option-example">Example: <code>250</code></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/restart.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/restart.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/restart.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/restart.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-startup">
   <h3 class="option-name">
@@ -722,7 +781,7 @@ If you do not need a startup hook, leave it unset.</p>
   runOnStartup = /nix/store/abcd1234-my-init/bin/my-init;
 }
 </code></pre></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/startup.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/startup.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/startup.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/startup.nix</a></code></div>
 </div>
 <div class="option" id="option-settings-startup-runOnStartup">
   <h3 class="option-name">
@@ -750,7 +809,7 @@ a long-running process, configure it as a service instead.</p>
   }
 )
 </code></pre></div>
-  <div class="option-declared">Declared in: <code><a href="file:///nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/startup.nix" target="_blank">/nix/store/0av5jqfykqpkj0lbbycl9i597nzgcslp-source/nimi/startup.nix</a></code></div>
+  <div class="option-declared">Declared in: <code><a href="file:///nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/startup.nix" target="_blank">/nix/store/iyp03y3lv9bjzfpsihh4mrqkrk2ms23p-source/nimi/startup.nix</a></code></div>
 </div>
 </div>
 
