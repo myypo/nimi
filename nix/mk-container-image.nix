@@ -31,7 +31,7 @@ in
             (settings: removeAttrs settings [ "imageConfig" ])
           ];
         in
-        inputs'.nix2container.packages.nix2container.buildImage (
+        (inputs'.nix2container.packages.nix2container.buildImage (
           {
             config = evaluatedConfig.config.settings.container.imageConfig // {
               entrypoint = [
@@ -40,7 +40,11 @@ in
             };
           }
           // cleanedSettings
-        );
+        )).overrideAttrs
+          (oldAttrs: {
+            passthru = (oldAttrs.passthru or { }) // evaluatedConfig.config.passthru;
+            meta = (oldAttrs.meta or { }) // evaluatedConfig.config.meta;
+          });
     };
 
 }
