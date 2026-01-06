@@ -6,7 +6,7 @@ in
   perSystem =
     { pkgs, config, ... }:
     rec {
-      packages.nimi = pkgs.rustPlatform.buildRustPackage (_finalAttrs: {
+      packages.nimi = pkgs.rustPlatform.buildRustPackage {
         pname = cargoToml.package.name;
         inherit (cargoToml.package) version;
 
@@ -41,9 +41,14 @@ in
         };
 
         passthru = {
-          inherit (config) evalServicesConfig;
+          inherit (config)
+            mkNimiBin
+            mkContainerImage
+            evalNimiModule
+            toNimiJson
+            ;
         };
-      });
+      };
 
       packages.default = packages.nimi;
       checks.nimi = packages.nimi;

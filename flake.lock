@@ -53,6 +53,27 @@
         "type": "github"
       }
     },
+    "nix2container": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1766000582,
+        "narHash": "sha256-QBMel1kJOuKT+bnvAoOlL4nIrMbowiI6dmQWJXXOa2M=",
+        "owner": "cameronraysmith",
+        "repo": "nix2container",
+        "rev": "6c5365c945af381435c77de7104ccf4f10b101e5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cameronraysmith",
+        "ref": "185-skopeo-fix",
+        "repo": "nix2container",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1766651565,
@@ -89,6 +110,7 @@
         "flake-parts": "flake-parts",
         "import-tree": "import-tree",
         "ndg": "ndg",
+        "nix2container": "nix2container",
         "nixpkgs": "nixpkgs",
         "systems": "systems",
         "treefmt-nix": "treefmt-nix"
