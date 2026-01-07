@@ -2,6 +2,8 @@
 
 `Nimi` is a tiny process manager for running [NixOS modular services](https://nixos.org/manual/nixos/unstable/#modular-services) inside containers or other minimal environments such as dev shells. It reads a JSON config produced by `nimi.mkNimiBin`, launches each service with clean environment settings, streams logs to the console, and handles shutdown and restart policy consistently.
 
+> Note: This is experimental software (as are NixOS modular services themselves), expect breaking changes and other weirdness. Here be dragons!
+
 # Overview
 
 `Nimi` gives you a lightweight PID 1 style runtime without pulling in a full init system. It is designed to pair with the modular services model such that you can define services once and then run them in a container, VM, or anywhere a small process manager is preferred.
