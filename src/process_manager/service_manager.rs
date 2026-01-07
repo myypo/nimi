@@ -45,7 +45,7 @@ pub struct ServiceManager {
 #[derive(Error, Debug)]
 pub enum ServiceError {
     /// Error for when the process exits with a non zero exit code
-    #[error("service exited with status {status}")]
+    #[error("Service exited with status - {status:?}")]
     ProcessExited {
         /// Exit status
         status: ExitStatus,
