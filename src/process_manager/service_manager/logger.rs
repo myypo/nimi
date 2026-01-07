@@ -3,6 +3,7 @@
 //! Reads the logs from the sub processes and prints them from the `Nimi` instance
 
 use std::{
+    fmt::Debug,
     path::{Path, PathBuf},
     sync::Arc,
 };
@@ -36,7 +37,7 @@ impl Logger {
         set: &mut JoinSet<Result<()>>,
     ) -> Result<()>
     where
-        D: AsyncRead + Unpin + Send + 'static,
+        D: AsyncRead + Unpin + Send + 'static + Debug,
     {
         let reader = Self::get_lines_reader(fd)
             .wrap_err("Failed to acquire lines reader for stdout logger")?;
@@ -134,9 +135,11 @@ impl Logger {
 
     fn get_lines_reader<D>(fd: &mut Option<D>) -> Result<Lines<BufReader<D>>>
     where
-        D: AsyncRead,
+        D: AsyncRead + Debug,
     {
-        let taken = fd.take().wrap_err("Service was missing field value")?;
+        let taken = fd
+            .take()
+            .wrap_err_with(|| format!("Service was missing field for {:?}", fd))?;
 
         Ok(BufReader::new(taken).lines())
     }
