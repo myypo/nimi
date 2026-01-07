@@ -29,6 +29,7 @@ in
           the same services configuration.
         '';
         type = types.lazyAttrsOf types.raw;
+        default = { };
       };
 
       config =
@@ -36,7 +37,10 @@ in
           nimiPkgs = lib.pipe config.nimi [
             (lib.mapAttrsToList (
               name: module: {
-                "${name}" = nimi.mkNimiBin module;
+                "${name}" = nimi.mkNimiBin {
+                  imports = [ module ];
+                  settings.binName = name;
+                };
               }
             ))
             lib.mergeAttrsList

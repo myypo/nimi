@@ -32,7 +32,7 @@ in
           cfgJson = config.toNimiJson evaluatedConfig;
         in
         pkgs.writeShellApplication {
-          name = "nimi";
+          name = evaluatedConfig.config.settings.binName;
           runtimeInputs = [ self'.packages.nimi ];
           text = ''
             exec nimi --config "${cfgJson}" run "$@"

@@ -18,6 +18,7 @@ let
             the same services configuration.
           '';
           type = types.lazyAttrsOf types.raw;
+          default = { };
         };
       };
 
@@ -28,9 +29,16 @@ let
 
           generatedNimiPkgs = lib.pipe config.nimi [
             (lib.mapAttrsToList (
-              name: module: {
-                "${name}-service" = nimi.mkNimiBin module;
-                "${name}-container" = nimi.mkContainerImage module;
+              name: module:
+              let
+                overwrittenName = {
+                  imports = [ module ];
+                  settings.binName = name;
+                };
+              in
+              {
+                "${name}-service" = nimi.mkNimiBin overwrittenName;
+                "${name}-container" = nimi.mkContainerImage overwrittenName;
               }
             ))
             lib.mergeAttrsList
