@@ -74,6 +74,7 @@
 <li><a href="flake-module.html">Flake Module</a></li>
 <li><a href="home-module.html">Home Manager Module</a></li>
 <li><a href="logging.html">Logging</a></li>
+<li><a href="overlay.html">Overlay</a></li>
 <li><a href="nixos-module.html">`NixOS` Module</a></li>
 <li><a href="search.html">Search</a></li>
 
@@ -120,7 +121,7 @@
 <h1 id="runtime-behavior">Runtime behavior</h1>
 <ul>
 <li>Optional startup binary runs once before services start.</li>
-<li>Each service runs with a clean environment and its configured <code>argv</code>.</li>
+<li>Each service runs its configured <code>argv</code>.</li>
 <li>Service logs stream to stdout/stderr with the service name as the log target.</li>
 <li>Restart behavior follows <code>settings.restart</code> (<code>never</code>, <code>up-to-count</code>, <code>always</code>).</li>
 <li><code>Ctrl-C</code> triggers a graceful shutdown and waits for services to exit.</li>
