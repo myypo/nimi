@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Home Manager Module - Nimi</title>
+        <title>Functions - Nimi</title>
 
 
         <!-- Custom HTML head -->
@@ -177,51 +177,80 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="home-manager-module"><a class="header" href="#home-manager-module">Home Manager Module</a></h1>
-<p>The Home Manager module output (<code>nimi.homeModules.default</code>) wires <code>Nimi</code> into a
-Home Manager configuration. It takes named service definitions and turns them
-into user packages and <code>systemd</code> user units, so you can run the same modular
-service config as per-user services.</p>
-<h2 id="what-it-provides"><a class="header" href="#what-it-provides">What it provides</a></h2>
-<p>For each <code>nimi.&lt;name&gt;</code> entry, the module generates:</p>
-<ul>
-<li><code>home.packages</code>: the <code>Nimi</code> runtime binary built from the services module.</li>
-<li><code>systemd.user.services.&lt;name&gt;</code>: a user service that runs the generated binary.</li>
-</ul>
-<h2 id="minimal-example"><a class="header" href="#minimal-example">Minimal example</a></h2>
-<pre><code class="language-nix">{
-  imports = [
-    inputs.nimi.homeModules.default
-  ];
-
-  nimi."web" = {
-    services."my-app" = {
-      process.argv = [
-        (lib.getExe pkgs.my-app)
-        "--port"
-        "8080"
-      ];
-    };
-    settings.restart.mode = "up-to-count";
-    settings.restart.time = 2000;
-  };
+                        <h1 id="sec-functions-library-"><a class="header" href="#sec-functions-library-">Nimi library functions</a></h1>
+<h2 id="niminimi.evalNimiModule"><a class="header" href="#niminimi.evalNimiModule"><code>nimi.evalNimiModule</code></a></h2>
+<p>Evaluate a nimi module and return its config. This runs the module set
+through <code>lib.evalModules</code> with the nimi module included so you get the
+fully merged, validated configuration output.</p>
+<h3 id="example"><a class="header" href="#example">Example</a></h3>
+<pre><code class="language-nix">evalNimiModule {
+  settings.binName = "my-nimi";
 }
 </code></pre>
-<h2 id="notes"><a class="header" href="#notes">Notes</a></h2>
-<ul>
-<li>Each <code>nimi.&lt;name&gt;</code> becomes a <code>systemd --user</code> unit named <code>&lt;name&gt;.service</code>.</li>
-<li>User services may require <code>loginctl enable-linger</code> if you need them running without an active session.</li>
-</ul>
+<h3 id="type"><a class="header" href="#type">Type</a></h3>
+<pre><code>evalNimiModule :: AttrSet -&gt; AttrSet
+</code></pre>
+<h3 id="arguments"><a class="header" href="#arguments">Arguments</a></h3>
+<dl>
+<dt id="module"><a class="header" href="#module">module</a></dt>
+<dd>A nimi module attrset.</dd>
+</dl>
+<h2 id="niminimi.toNimiJson"><a class="header" href="#niminimi.toNimiJson"><code>nimi.toNimiJson</code></a></h2>
+<p>Render an evaluated config to validated JSON. The config is serialized,
+formatted with <code>jq</code>, then validated by running <code>nimi --config ... validate</code>
+so the resulting file is both pretty-printed and schema-checked.</p>
+<h3 id="example-1"><a class="header" href="#example-1">Example</a></h3>
+<pre><code class="language-nix">let cfg = evalNimiModule { settings.binName = "my-nimi"; };
+in toNimiJson cfg
+</code></pre>
+<h3 id="type-1"><a class="header" href="#type-1">Type</a></h3>
+<pre><code>toNimiJson :: AttrSet -&gt; Path
+</code></pre>
+<h3 id="arguments-1"><a class="header" href="#arguments-1">Arguments</a></h3>
+<dl>
+<dt id="evaluatedconfig"><a class="header" href="#evaluatedconfig">evaluatedConfig</a></dt>
+<dd>The evaluated nimi config.</dd>
+</dl>
+<h2 id="niminimi.mkNimiBin"><a class="header" href="#niminimi.mkNimiBin"><code>nimi.mkNimiBin</code></a></h2>
+<p>Build a wrapper binary for a given nimi module. This evaluates the module,
+writes a validated JSON config, and emits a shell wrapper that runs <code>nimi</code>
+with that config so consumers can execute it like a normal binary.</p>
+<h3 id="example-2"><a class="header" href="#example-2">Example</a></h3>
+<pre><code class="language-nix">mkNimiBin { settings.binName = "my-nimi"; }
+</code></pre>
+<h3 id="type-2"><a class="header" href="#type-2">Type</a></h3>
+<pre><code>mkNimiBin :: AttrSet -&gt; Derivation
+</code></pre>
+<h3 id="arguments-2"><a class="header" href="#arguments-2">Arguments</a></h3>
+<dl>
+<dt id="module-1"><a class="header" href="#module-1">module</a></dt>
+<dd>A nimi module attrset.</dd>
+</dl>
+<h2 id="niminimi.mkContainerImage"><a class="header" href="#niminimi.mkContainerImage"><code>nimi.mkContainerImage</code></a></h2>
+<p>Build a container image for a given nimi module. This evaluates the module,
+wires the container entrypoint to the wrapper binary, and uses
+<code>nix2container.buildImage</code> when available (otherwise <code>dockerTools.buildImage</code>).</p>
+<h3 id="example-3"><a class="header" href="#example-3">Example</a></h3>
+<pre><code class="language-nix">mkContainerImage { settings.binName = "my-nimi"; }
+</code></pre>
+<h3 id="type-3"><a class="header" href="#type-3">Type</a></h3>
+<pre><code>mkContainerImage :: AttrSet -&gt; Derivation
+</code></pre>
+<h3 id="arguments-3"><a class="header" href="#arguments-3">Arguments</a></h3>
+<dl>
+<dt id="module-2"><a class="header" href="#module-2">module</a></dt>
+<dd>A nimi module attrset.</dd>
+</dl>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="nixos-module.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="home-module.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="functions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="options.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -231,11 +260,11 @@ service config as per-user services.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="nixos-module.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="home-module.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="functions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="options.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
