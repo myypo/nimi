@@ -9,4 +9,5 @@
 - [Flake Module](./flake-module.md)
 - [NixOS Module](./nixos-module.md)
 - [Home Manager Module](./home-module.md)
+- [Functions](./functions.md)
 - [Options](./options.md)

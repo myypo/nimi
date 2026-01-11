@@ -3,6 +3,7 @@
   nixosOptionsDoc,
   mdbook,
   stdenvNoCC,
+  nixdoc,
   pkgs,
 }:
 let
@@ -24,6 +25,7 @@ stdenvNoCC.mkDerivation {
 
   nativeBuildInputs = [
     mdbook
+    nixdoc
   ];
 
   dontBuild = true;
@@ -31,6 +33,14 @@ stdenvNoCC.mkDerivation {
     mkdir -p "$out/share/nimi/docs"
 
     ln -sf "${moduleOptsDoc.optionsCommonMark}" docs/options.md
+
+    nixdoc \
+      --file nix/lib.nix \
+      --category "" \
+      --description "Nimi library functions" \
+      --prefix "nimi" \
+      --anchor-prefix "nimi" \
+      > docs/functions.md
 
     mdbook build --dest-dir "$out/share/nimi/docs"
   '';
