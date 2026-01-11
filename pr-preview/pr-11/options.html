@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "ayu";
-            window.path_to_searchindex_js = "searchindex-8700801c.js";
+            window.path_to_searchindex_js = "searchindex-fc89e918.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-8e5b739f.js"></script>
@@ -234,6 +234,65 @@ lazy attribute set of raw value</p>
 <ul>
 <li><a href="https://github.com/NixOS/nixpkgs/blob//lib/modules.nix">&lt;nixpkgs/lib/modules.nix&gt;</a></li>
 </ul>
+<h2 id="assertionsassertion"><a class="header" href="#assertionsassertion">assertions.*.assertion</a></h2>
+<p>Assertion to evaluate and check.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/assertions.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/assertions.nix</a></li>
+</ul>
+<h2 id="assertionsmessage"><a class="header" href="#assertionsmessage">assertions.*.message</a></h2>
+<p>Message to print on assertion failure.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/assertions.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/assertions.nix</a></li>
+</ul>
+<h2 id="meta"><a class="header" href="#meta">meta</a></h2>
+<p><a href="https://ryantm.github.io/nixpkgs/stdenv/meta/"><code>meta</code></a> attributes to
+include in the output of generated <code>Nimi</code> packages</p>
+<p><em>Type:</em>
+lazy attribute set of raw value</p>
+<p><em>Default:</em>
+<code>{ }</code></p>
+<p><em>Example:</em></p>
+<pre><code>{
+  meta = {
+    description = "My cool nimi package";
+  };
+}
+
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/meta.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/meta.nix</a></li>
+</ul>
+<h2 id="passthru"><a class="header" href="#passthru">passthru</a></h2>
+<p><a href="https://ryantm.github.io/nixpkgs/stdenv/stdenv/#var-stdenv-passthru"><code>passthru</code></a> attributes to
+include in the output of generated <code>Nimi</code> packages</p>
+<p><em>Type:</em>
+lazy attribute set of raw value</p>
+<p><em>Default:</em>
+<code>{ }</code></p>
+<p><em>Example:</em></p>
+<pre><code>{
+  passthru = {
+    doXYZ = pkgs.writeShellApplication {
+      name = "xyz-doer";
+      text = ''
+        xyz
+      '';
+    };
+  };
+}
+
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/passthru.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/passthru.nix</a></li>
+</ul>
 <h2 id="services"><a class="header" href="#services">services</a></h2>
 <p>Services to run inside the nimi runtime.</p>
 <p>Each attribute defines a named modular service: a reusable, composable
@@ -280,7 +339,7 @@ lazy attribute set of (submodule)</p>
 </code></pre>
 <p><em>Declared by:</em></p>
 <ul>
-<li><a href="file:///nix/store/w0rdff1c547wqvdp87gh3aq0l5kvvkhg-source/nix/nimi-module.nix">/nix/store/w0rdff1c547wqvdp87gh3aq0l5kvvkhg-source/nix/nimi-module.nix</a></li>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/nimi-module.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/nimi-module.nix</a></li>
 </ul>
 <h2 id="servicesnameconfigdata"><a class="header" href="#servicesnameconfigdata">services.&lt;name&gt;.configData</a></h2>
 <p>Configuration data files for the service</p>
@@ -396,6 +455,315 @@ attribute set of (submodule)</p>
 <p><em>Declared by:</em></p>
 <ul>
 <li><a href="file:///nix/store/iw72havb386brl34359h7jp0wi4ixhw4-i77jvi0qh4kddj4hraizq1j0c028q05l-source/nixos/modules/system/service/portable/service.nix">/nix/store/iw72havb386brl34359h7jp0wi4ixhw4-i77jvi0qh4kddj4hraizq1j0c028q05l-source/nixos/modules/system/service/portable/service.nix</a></li>
+</ul>
+<h2 id="settingsbinname"><a class="header" href="#settingsbinname">settings.binName</a></h2>
+<p>Name of the binary to generate with your nimi wrapper.</p>
+<p>Changes the name of the default generated binary name
+from “nimi” to whatever you select.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"nimi"</code></p>
+<p><em>Example:</em></p>
+<pre><code>{
+  settings.binName = "my-awesome-service-runner";
+}
+
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/bin-name.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/bin-name.nix</a></li>
+</ul>
+<h2 id="settingscontainer"><a class="header" href="#settingscontainer">settings.container</a></h2>
+<p>Configures nimi’s builtin container generation.</p>
+<p>Note that none of these options will have any effect unless you are using
+<code>nimi.mkContainerImage</code> to build your containers.</p>
+<p>These are mappings to <a href="https://github.com/nlewo/nix2container?tab=readme-ov-file#nix2containerbuildimage"><code>nix2container</code>’s <code>buildImage</code></a> function, please
+check there for further documentation.</p>
+<p><em>Type:</em>
+submodule</p>
+<p><em>Default:</em>
+<code>{ }</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix</a></li>
+</ul>
+<h2 id="settingscontainercopytoroot"><a class="header" href="#settingscontainercopytoroot">settings.container.copyToRoot</a></h2>
+<p>A derivation (or list of derivations) copied in the image root directory
+(store path prefixes <code>/nix/store/hash-path</code> are removed,
+in order to relocate them at the image <code>/</code>).</p>
+<p><code>pkgs.buildEnv</code> can be used to build a derivation which has to
+be copied to the image root. For instance, to get bash and
+coreutils in the image <code>/bin</code>:</p>
+<p><em>Type:</em>
+(list of path in the Nix store) or path in the Nix store convertible to it</p>
+<p><em>Default:</em>
+<code>[ ]</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix</a></li>
+</ul>
+<h2 id="settingscontainerfromimage"><a class="header" href="#settingscontainerfromimage">settings.container.fromImage</a></h2>
+<p>An image that is used as base image of this image;</p>
+<p>Use <code>nix2container.pullImage</code> or <code>nix2container.pullImageFromManifest</code> to supply this.</p>
+<p><em>Type:</em>
+null or path in the Nix store</p>
+<p><em>Default:</em>
+<code>null</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix</a></li>
+</ul>
+<h2 id="settingscontainerimageconfig"><a class="header" href="#settingscontainerimageconfig">settings.container.imageConfig</a></h2>
+<p>An attribute set describing an image configuration as defined in the <a href="https://github.com/opencontainers/image-spec/blob/8b9d41f48198a7d6d0a5c1a12dc2d1f7f47fc97f/specs-go/v1/config.go#L23">OCI image specification</a>.</p>
+<p><em>Type:</em>
+open submodule of lazy attribute set of anything</p>
+<p><em>Default:</em>
+<code>{ }</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix</a></li>
+</ul>
+<h2 id="settingscontainerinitializenixdatabase"><a class="header" href="#settingscontainerinitializenixdatabase">settings.container.initializeNixDatabase</a></h2>
+<p>To initialize the Nix database with all store paths added into the image.</p>
+<p>Note this is only useful to run nix commands from the image,
+for instance to build an image used by a CI to run Nix builds.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix</a></li>
+</ul>
+<h2 id="settingscontainerlayers"><a class="header" href="#settingscontainerlayers">settings.container.layers</a></h2>
+<p>A list of layers built with the <code>nix2container.buildLayer</code> function.</p>
+<p>If a store path in deps or contents belongs to one of these layers, this store path is skipped.</p>
+<p>This is pretty useful to isolate store paths that are often updated from more stable store paths,
+to speed up build and push time.</p>
+<p><em>Type:</em>
+list of path in the Nix store</p>
+<p><em>Default:</em>
+<code>[ ]</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix</a></li>
+</ul>
+<h2 id="settingscontainermaxlayers"><a class="header" href="#settingscontainermaxlayers">settings.container.maxLayers</a></h2>
+<p>The maximum number of layers to create.</p>
+<p>This is based on the store path “popularity” as described in <a href="https://grahamc.com/blog/nix-and-layered-docker-images/">this blog post</a>.</p>
+<p>Note this is applied on the image layers and not on layers added with the <code>buildImage.layers</code> attribute.</p>
+<p><em>Type:</em>
+positive integer, meaning &gt;0</p>
+<p><em>Default:</em>
+<code>1</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix</a></li>
+</ul>
+<h2 id="settingscontainername"><a class="header" href="#settingscontainername">settings.container.name</a></h2>
+<p>The name of the generated image</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"nimi-container"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix</a></li>
+</ul>
+<h2 id="settingscontainerperms"><a class="header" href="#settingscontainerperms">settings.container.perms</a></h2>
+<p>A list of file permisssions which are set when the tar layer is created: these permissions are not written to the Nix store.</p>
+<p><em>Type:</em>
+list of (submodule)</p>
+<p><em>Default:</em>
+<code>[ ]</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix</a></li>
+</ul>
+<h2 id="settingscontainertag"><a class="header" href="#settingscontainertag">settings.container.tag</a></h2>
+<p>The tag for the generated image to use</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"latest"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/container.nix</a></li>
+</ul>
+<h2 id="settingslogging"><a class="header" href="#settingslogging">settings.logging</a></h2>
+<p>Logging behavior for the nimi process manager.</p>
+<p>This section controls if per-service log files are written during a run.
+When enabled, each service writes to its own file under the configured
+logs directory.</p>
+<p>Log files are created at runtime and live in a run-specific subdirectory
+under <code>logsDir</code> (for example <code>logs-0/service-a.txt</code>). Each line from the
+service stdout or stderr is appended to the same file, preserving
+execution order as best as possible.</p>
+<p><em>Type:</em>
+submodule</p>
+<p><em>Default:</em>
+<code>{ }</code></p>
+<p><em>Example:</em></p>
+<pre><code>{
+  enable = true;
+  logsDir = "my_logs";
+}
+
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/logging.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/logging.nix</a></li>
+</ul>
+<h2 id="settingsloggingenable"><a class="header" href="#settingsloggingenable">settings.logging.enable</a></h2>
+<p>Whether to enable If per-service log files should be written to <code>settings.logging.logsDir</code>.</p>
+<p>When disabled, log output still streams to stdout/stderr but no files
+are created.
+.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Example:</em>
+<code>true</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/logging.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/logging.nix</a></li>
+</ul>
+<h2 id="settingslogginglogsdir"><a class="header" href="#settingslogginglogsdir">settings.logging.logsDir</a></h2>
+<p>Directory to create and write per-service logs to.</p>
+<p>Nimi creates a <code>logs-&lt;n&gt;</code> subdirectory inside this path at runtime
+and writes one file per service.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"nimi_logs"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/logging.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/logging.nix</a></li>
+</ul>
+<h2 id="settingsrestart"><a class="header" href="#settingsrestart">settings.restart</a></h2>
+<p>Restart policy for the nimi process manager.</p>
+<p>Use this to control if and how services are restarted after they exit.
+This is the main safety net for keeping long-running services alive, and
+also a guardrail to prevent tight restart loops from burning CPU.</p>
+<p>You can choose a policy that matches the reliability needs of each
+deployment. For development you might disable restarts entirely, while
+production workloads usually benefit from a bounded or always-on policy.</p>
+<p><em>Type:</em>
+submodule</p>
+<p><em>Default:</em>
+<code>{ }</code></p>
+<p><em>Example:</em></p>
+<pre><code>{
+  mode = "up-to-count";
+  time = 500;
+  count = 3;
+}
+
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/restart.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/restart.nix</a></li>
+</ul>
+<h2 id="settingsrestartcount"><a class="header" href="#settingsrestartcount">settings.restart.count</a></h2>
+<p>Maximum number of restart attempts when <code>mode</code> is <code>up-to-count</code>.</p>
+<p>Once this limit is reached, the service is left stopped until you
+intervene or change the configuration.</p>
+<p><em>Type:</em>
+positive integer, meaning &gt;0</p>
+<p><em>Default:</em>
+<code>5</code></p>
+<p><em>Example:</em>
+<code>3</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/restart.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/restart.nix</a></li>
+</ul>
+<h2 id="settingsrestartmode"><a class="header" href="#settingsrestartmode">settings.restart.mode</a></h2>
+<p>Selects the restart behavior.</p>
+<ul>
+<li><code>never</code>: do not restart failed services.</li>
+<li><code>up-to-count</code>: restart up to <code>count</code> times, then stop.</li>
+<li><code>always</code>: always restart on failure.</li>
+</ul>
+<p>Choose <code>up-to-count</code> if you want a service to get a few retries
+during a transient failure, but still fail fast when the issue is
+persistent. Choose <code>always</code> when continuous availability matters
+more than surfacing the failure.</p>
+<p><em>Type:</em>
+one of “never”, “up-to-count”, “always”</p>
+<p><em>Default:</em>
+<code>"always"</code></p>
+<p><em>Example:</em>
+<code>"up-to-count"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/restart.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/restart.nix</a></li>
+</ul>
+<h2 id="settingsrestarttime"><a class="header" href="#settingsrestarttime">settings.restart.time</a></h2>
+<p>Delay between restarts in milliseconds.</p>
+<p>Increase this value for crash loops to give the system time to
+recover resources or for dependent services to come back.</p>
+<p><em>Type:</em>
+positive integer, meaning &gt;0</p>
+<p><em>Default:</em>
+<code>1000</code></p>
+<p><em>Example:</em>
+<code>250</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/restart.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/restart.nix</a></li>
+</ul>
+<h2 id="settingsstartup"><a class="header" href="#settingsstartup">settings.startup</a></h2>
+<p>Startup behavior for the nimi process manager.</p>
+<p>This section lets you run a one-time initialization command before any
+configured services are started. It is useful for bootstrapping state,
+preparing directories, or running a short setup task that should happen
+once per process manager start.</p>
+<p>The command is executed once and then the normal service startup proceeds.
+If you do not need a startup hook, leave it unset.</p>
+<p><em>Type:</em>
+submodule</p>
+<p><em>Default:</em>
+<code>{ }</code></p>
+<p><em>Example:</em></p>
+<pre><code>{
+  runOnStartup = /nix/store/abcd1234-my-init/bin/my-init;
+}
+
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/startup.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/startup.nix</a></li>
+</ul>
+<h2 id="settingsstartuprunonstartup"><a class="header" href="#settingsstartuprunonstartup">settings.startup.runOnStartup</a></h2>
+<p>Path to a binary to run once at startup.</p>
+<p>This should be a single executable in the Nix store, not a shell
+snippet. Use <code>lib.getExe</code> to turn a package or derivation into a
+runnable path.</p>
+<p>The command runs before services start, so it is a good place to
+create files, check preconditions, or populate caches. If you need
+a long-running process, configure it as a service instead.</p>
+<p>Set to <code>null</code> to disable.</p>
+<p><em>Type:</em>
+null or path in the Nix store</p>
+<p><em>Default:</em>
+<code>null</code></p>
+<p><em>Example:</em></p>
+<pre><code>lib.getExe (
+  pkgs.writeShellApplication {
+    name = "example-startup-script";
+    text = ''
+      echo "hello world"
+    '';
+  }
+)
+
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="file:///nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/startup.nix">/nix/store/hlr7aa5wwg0nv8ddgj6csswk24zafkgy-source/nix/modules/startup.nix</a></li>
 </ul>
 
                     </main>
