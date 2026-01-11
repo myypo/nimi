@@ -2,15 +2,20 @@
   description = "Container PID 1 and process runner for Nix Modular Services";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  inputs.nix2container.url = "github:nlewo/nix2container";
+  inputs.nix2container = {
+    url = "github:nlewo/nix2container";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
 
   outputs =
-    { nixpkgs, ... }:
+    { nixpkgs, nix2container, ... }:
     let
       inherit (nixpkgs) lib;
 
       overlay = final: _prev: {
-        nimi = final.callPackage ./nix/package.nix { };
+        nimi = final.callPackage ./nix/package.nix {
+          inherit (nix2container.packages.${final.stdenv.hostPlatform.system}) nix2container;
+        };
       };
 
       eachSystem =
@@ -26,7 +31,13 @@
         );
     in
     {
-      packages = eachSystem ({ pkgs, ... }: import ./default.nix { inherit pkgs; });
+      packages = eachSystem (
+        { pkgs, system, ... }:
+        import ./default.nix {
+          inherit pkgs;
+          inherit (nix2container.packages.${system}) nix2container;
+        }
+      );
       checks = eachSystem (
         { pkgs, ... }:
         let
