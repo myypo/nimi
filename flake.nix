@@ -10,7 +10,7 @@
       inherit (nixpkgs) lib;
 
       overlay = final: _prev: {
-        nimi = final.callPackage ./nix/package.nix {};
+        nimi = final.callPackage ./nix/package.nix { };
       };
 
       eachSystem =
@@ -29,10 +29,15 @@
       packages = eachSystem ({ pkgs, ... }: import ./default.nix { inherit pkgs; });
       checks = eachSystem (
         { pkgs, ... }:
-        lib.packagesFromDirectoryRecursive {
-          directory = ./nix/checks;
-          inherit (pkgs) callPackage;
-        }
+        let
+          checksFromDir =
+            directory:
+            lib.packagesFromDirectoryRecursive {
+              inherit (pkgs) callPackage;
+              inherit directory;
+            };
+        in
+        (checksFromDir ./examples) // (checksFromDir ./nix/checks)
       );
 
       devShells = eachSystem (
