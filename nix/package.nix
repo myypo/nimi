@@ -7,6 +7,7 @@
   writeShellApplication,
   dockerTools,
   pkgs,
+  nix2container ? null,
   ...
 }@pkgArgs:
 let
@@ -25,11 +26,17 @@ let
       `nix2container.buildImage`. You may run into unexpected errors
       and/or generate larger containers than otherwise.
 
-      Try passing `nix2container` to `nimi`:
+      Try passing `nix2container` to `nimi` (or use the flake):
 
       ```nix
       nimi = import <nimi> { inherit nix2container; };
       ```
+    '';
+    ignoredAttrsBecauseofNix2containerWarning = attrs: ''
+      The following container attributes are ignored because `nix2container`
+      has not been passed:
+
+      ${builtins.toJSON attrs}
     '';
   };
 
@@ -120,13 +127,31 @@ rustPlatform.buildRustPackage (
           config = imageCfg;
         };
 
+        hasNixToContainer = nix2container != null;
+
         buildImage =
-          if pkgArgs ? nix2container then
+          if hasNixToContainer then
             pkgArgs.nix2container.buildImage
           else
             lib.warn warnings.noNix2containerArg dockerTools.buildImage;
 
-        image = buildImage imageArgs;
+        minimalArgSet =
+          if hasNixToContainer then
+            imageArgs
+          else
+            let
+              attrsToRemove = [
+                "layers"
+                "maxLayers"
+                "perms"
+                "initializeNixDatabase"
+              ];
+            in
+            lib.warn (warnings.ignoredAttrsBecauseofNix2containerWarning attrsToRemove) (
+              removeAttrs imageArgs attrsToRemove
+            );
+
+        image = buildImage minimalArgSet;
       in
       builtins.addErrorContext errorCtxs.failedToEvaluateNimiContainer (
         image.overrideAttrs (oldAttrs: {
