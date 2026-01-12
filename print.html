@@ -3,7 +3,8 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Options - Nimi</title>
+        <title>Nimi</title>
+        <meta name="robots" content="noindex">
 
 
         <!-- Custom HTML head -->
@@ -177,7 +178,385 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h2 id="_moduleargs"><a class="header" href="#_moduleargs">_module.args</a></h2>
+                        <h1 id="nimi"><a class="header" href="#nimi"><code>Nimi</code></a></h1>
+<p><code>Nimi</code> is a tiny process manager built for running NixOS modular services in containers and other minimal environments. It turns a NixOS modular services configuration into a reliable, lightweight runtime that starts services, streams logs, and applies predictable restart and startup behavior.</p>
+<h1 id="why-nimi"><a class="header" href="#why-nimi">Why <code>Nimi</code></a></h1>
+<p>Modular services are composable Nix modules: you can import a service, override options, and instantiate it multiple times with different settings. <code>Nimi</code> is the runtime that brings those modules to life outside a full init system (i.e. <code>systemd</code>).</p>
+<p>If you are new to modular services, the upstream explanation is the best place to start: <a href="https://nixos.org/manual/nixos/unstable/#modular-services">NixOS Modular Services Manual</a>.</p>
+<h1 id="whats-in-the-box"><a class="header" href="#whats-in-the-box">What’s in the box</a></h1>
+<ul>
+<li>A small PID 1 style runtime suitable for containers.</li>
+<li>Clean process execution with structured startup and shutdown flow.</li>
+<li>Configurable restart behavior for resilient services.</li>
+<li>One-time startup hook for quick initialization steps.</li>
+<li>Clear, instance-per-service configuration using modular services.</li>
+</ul>
+<h1 id="usage"><a class="header" href="#usage">Usage</a></h1>
+<ol>
+<li>Define services using modular service modules.</li>
+<li>Evaluate the config with <code>nimi.mkNimiBin</code> to produce JSON.</li>
+<li>Run <code>Nimi</code> with the generated config to launch and supervise services.</li>
+</ol>
+<h1 id="quick-start"><a class="header" href="#quick-start">Quick-start</a></h1>
+<p>Minimal Nix configuration:</p>
+<pre><code class="language-nix">packages.${system}.myNimiWrapper = pkgs.nimi.mkNimiBin {
+  services."my-service" = {
+    imports = [ pkgs.some-application.services.default ];
+    someApplication = {
+      listen = "0.0.0.0:8080";
+      dataDir = "/var/lib/my-service";
+    };
+  };
+  settings.restart.mode = "up-to-count";
+  settings.restart.time = 2000;
+}
+</code></pre>
+<p>Run the generated config:</p>
+<pre><code class="language-bash">nix run .#myNimiWrapper
+</code></pre>
+<h1 id="configuration-highlights"><a class="header" href="#configuration-highlights">Configuration highlights</a></h1>
+<ul>
+<li><code>services</code>: declare named service instances by importing modular service
+modules and overriding options per instance.</li>
+<li><code>settings.restart</code>: choose <code>never</code>, <code>up-to-count</code>, or <code>always</code>, and tune delay
+and retry count.</li>
+<li><code>settings.startup</code>: optionally run one binary before services start.</li>
+<li><code>settings.logging</code>: write per-service log files; see <code>docs/logging.md</code>.</li>
+<li><code>configData</code>: define per-service config files; see <code>docs/config-data.md</code>.</li>
+</ul>
+<h1 id="next-steps"><a class="header" href="#next-steps">Next steps</a></h1>
+<ul>
+<li>Explore service definitions and compose them per environment.</li>
+<li>Use restart policies to match reliability needs.</li>
+<li>Add a startup hook for migrations, warm-ups, or one-time init tasks.</li>
+<li>Create containers with <code>docs/container.md</code>.</li>
+<li>Add <code>pkgs.nimi</code> to an existing <code>nixpkgs</code> instance with <code>docs/overlay.md</code>.</li>
+<li>Integrate with Nix tooling: <code>docs/flake-module.md</code>, <code>docs/nixos-module.md</code>, and <code>docs/home-module.md</code>.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="command-line-interface"><a class="header" href="#command-line-interface">Command Line Interface</a></h1>
+<p>The <code>Nimi</code> CLI is the runtime entry-point for a generated modular services config. It validates the config, runs startup hooks, launches services, and streams their logs until shutdown.</p>
+<h1 id="intended-use"><a class="header" href="#intended-use">Intended use</a></h1>
+<p><code>Nimi</code> is meant to be the final step after evaluating a modular services configuration with <code>nimi.mkNimiBin</code>. It is lightweight enough for containers, but still gives you consistent startup, restart, and shutdown behavior.</p>
+<h1 id="basic-flow"><a class="header" href="#basic-flow">Basic flow</a></h1>
+<ol>
+<li>Generate a JSON config using <code>nimi.mkNimiBin</code>.</li>
+<li>Run <code>nimi --config ./my-config.json validate</code> to check it.</li>
+<li>Run <code>nimi --config ./my-config.json run</code> to launch services.</li>
+</ol>
+<h1 id="commands"><a class="header" href="#commands">Commands</a></h1>
+<ul>
+<li><code>validate</code>: read and deserialize the config to ensure it is well-formed.</li>
+<li><code>run</code>: start the process manager and run all configured services.</li>
+</ul>
+<h1 id="flags"><a class="header" href="#flags">Flags</a></h1>
+<ul>
+<li><code>--config</code>, <code>-c</code>: path to the generated JSON configuration file.</li>
+</ul>
+<h1 id="runtime-behavior"><a class="header" href="#runtime-behavior">Runtime behavior</a></h1>
+<ul>
+<li>Optional startup binary runs once before services start.</li>
+<li>Each service runs its configured <code>argv</code>.</li>
+<li>Service logs stream to stdout/stderr with the service name as the log target.</li>
+<li>Restart behavior follows <code>settings.restart</code> (<code>never</code>, <code>up-to-count</code>, <code>always</code>).</li>
+<li><code>Ctrl-C</code> triggers a graceful shutdown and waits for services to exit.</li>
+</ul>
+<h1 id="example"><a class="header" href="#example">Example</a></h1>
+<pre><code class="language-bash">nimi --config ./result/nimi-config.json validate
+nimi --config ./result/nimi-config.json run
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="config-data-files"><a class="header" href="#config-data-files">Config Data Files</a></h1>
+<p><code>configData</code> lets modular service modules supply config files to a service
+instance. <code>Nimi</code> treats the entries in the generated JSON as the final, resolved
+files to expose.</p>
+<p>At runtime, for each service:</p>
+<ul>
+<li><code>Nimi</code> serializes the service’s <code>configData</code> entries, hashes them, and creates a
+temp directory (usually under <code>/tmp</code>) named <code>nimi-config-&lt;sha256&gt;</code>.</li>
+<li>Each <code>configData.&lt;name&gt;.source</code> is symlinked into that directory at the
+relative <code>configData.&lt;name&gt;.path</code> location.</li>
+<li>The service is started with <code>XDG_CONFIG_HOME</code> set to the temp directory, so it
+can read config files at <code>$XDG_CONFIG_HOME/&lt;path&gt;</code>.</li>
+</ul>
+<p><code>Nimi</code> does not render <code>configData.&lt;name&gt;.text</code> itself; the Nix evaluation/build
+step generates the <code>source</code> files and the JSON points at them. Hence, updating the content
+requires rebuilding the config and restarting <code>Nimi</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="logging"><a class="header" href="#logging">Logging</a></h1>
+<p><code>Nimi</code> streams service logs to <code>stdout</code>/<code>stderr</code> and can also write per-service log
+files when <code>settings.logging.enable</code> is set.</p>
+<h1 id="file-layout"><a class="header" href="#file-layout">File layout</a></h1>
+<p>When logging is enabled, <code>Nimi</code> creates a run-specific directory under
+<code>settings.logging.logsDir</code> and writes one file per service:</p>
+<ul>
+<li><code>logs-{n}/service-a.txt</code></li>
+<li><code>logs-{n}/service-b.txt</code></li>
+</ul>
+<blockquote>
+<p>Where <code>n</code> is the successive iteration ran using the same logging directory</p>
+</blockquote>
+<p>Each file receives line-oriented output from the service. Both <code>stdout</code> and
+<code>stderr</code> are appended to the same file, so the contents reflect the combined
+stream.</p>
+<h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
+<pre><code class="language-nix">settings.logging = {
+  enable = true;
+  logsDir = "my_logs";
+};
+</code></pre>
+<h1 id="notes"><a class="header" href="#notes">Notes</a></h1>
+<ul>
+<li>Log files are created at runtime; they do not exist in the Nix store.</li>
+<li>Disabling logging still streams logs to stdout/stderr, but no files are
+created.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="containers"><a class="header" href="#containers">Containers</a></h1>
+<p><code>Nimi</code> ships with a built-in container generator wired through <code>mkContainerImage</code>,
+exposed via the package passthru (for example <code>pkgs.nimi.mkContainerImage</code> or
+<code>self'.packages.nimi.mkContainerImage</code> in a flake).
+It evaluates the same modular services config as <code>mkNimiBin</code>, then builds an OCI
+image via <code>nix2container.buildImage</code> with the <code>Nimi</code> runner set as the <code>entrypoint</code>.</p>
+<h1 id="minimal-example"><a class="header" href="#minimal-example">Minimal example</a></h1>
+<pre><code class="language-nix">pkgs.nimi.mkContainerImage {
+  services."my-app" = {
+    imports = [ pkgs.some-application.services.default ];
+    someApplication.listen = "0.0.0.0:8080";
+  };
+  settings.restart.mode = "up-to-count";
+};
+</code></pre>
+<p>Build the image:</p>
+<pre><code class="language-bash">nix build .#my-container
+</code></pre>
+<h1 id="image-settings"><a class="header" href="#image-settings">Image settings</a></h1>
+<p>Use <code>settings.container</code> to control the image build. These options map directly
+to <code>nix2container.buildImage</code>, so you can pass things like a base image or extra
+files.</p>
+<pre><code class="language-nix">settings.container = {
+  name = "my-app";
+  tag = "v1";
+  fromImage = inputs.nix2container.packages.${system}.nix2container.pullImage {
+    imageName = "alpine";
+    imageDigest = "sha256:...";
+    finalImageName = "alpine";
+    finalImageTag = "3.20";
+  };
+  copyToRoot = [
+    (pkgs.buildEnv {
+      name = "runtime-bins";
+      paths = [ pkgs.coreutils pkgs.bash ];
+      pathsToLink = [ "/bin" ];
+    })
+  ];
+};
+</code></pre>
+<h1 id="notes-1"><a class="header" href="#notes-1">Notes</a></h1>
+<ul>
+<li>The <code>entrypoint</code> is always the generated <code>Nimi</code> runner from <code>mkNimiBin</code>.</li>
+<li><code>settings.container</code> only has an effect when building with <code>mkContainerImage</code>.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="overlay"><a class="header" href="#overlay">Overlay</a></h1>
+<p><code>Nimi</code> exposes an overlay as a standalone flake output. Use it when you want to
+add <code>nimi</code> to an existing <code>nixpkgs</code> instance in order to make using the <code>passthru</code> attributes easier.</p>
+<h2 id="example-1"><a class="header" href="#example-1">Example</a></h2>
+<pre><code class="language-nix">{
+  inputs.nimi.url = "github:weyl-ai/nimi";
+
+  outputs = { self, nixpkgs, nimi, ... }:
+    let
+      system = "x86_64-linux";
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [ nimi.overlays.default ];
+      };
+    in
+    {
+      packages.${system}.default = pkgs.nimi;
+    };
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="flake-module"><a class="header" href="#flake-module">Flake Module</a></h1>
+<p>The flake module output (<code>nimi.flakeModule</code>) wires <code>Nimi</code> into a <code>flake-parts</code> setup.
+It takes named service definitions and turns them into runnable <code>Nimi</code> binaries and
+container images, so you can build local runners, CI checks, and deployable
+artifacts from one source of truth.</p>
+<h2 id="what-it-provides"><a class="header" href="#what-it-provides">What it provides</a></h2>
+<p>For each <code>perSystem.nimi.&lt;name&gt;</code> entry, the module generates:</p>
+<ul>
+<li><code>packages.&lt;name&gt;-service</code>: a <code>Nimi</code> runtime binary built from the services module.</li>
+<li><code>packages.&lt;name&gt;-container</code>: a container image bundling that runtime.</li>
+<li><code>checks.&lt;name&gt;-service</code> and <code>checks.&lt;name&gt;-container</code>: the same outputs, wired into CI.</li>
+</ul>
+<h2 id="minimal-example-1"><a class="header" href="#minimal-example-1">Minimal example</a></h2>
+<pre><code class="language-nix">{
+  perSystem = { pkgs, ... }: {
+    nimi."web" = {
+      services."my-app" = {
+        process.argv = [
+          (lib.getExe pkgs.my-app)
+          "--port"
+          "8080"
+        ];
+      };
+      settings.restart.mode = "up-to-count";
+      settings.restart.time = 2000;
+    };
+  };
+}
+</code></pre>
+<p>Build or run the outputs:</p>
+<pre><code class="language-bash">nix build .#web-service
+nix build .#web-container
+</code></pre>
+<h2 id="notes-2"><a class="header" href="#notes-2">Notes</a></h2>
+<ul>
+<li>The module is designed for <code>flake-parts</code> and expects <code>perSystem.nimi</code> entries.</li>
+<li>Outputs are generated per system, so each target platform gets its own runner.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="nixos-module"><a class="header" href="#nixos-module"><code>NixOS</code> Module</a></h1>
+<p>The <code>NixOS</code> module output (<code>nimi.nixosModules.default</code>) wires <code>Nimi</code> into a <code>NixOS</code>
+configuration. It takes named service definitions and turns them into system
+packages and <code>systemd</code> units, so you can run the same modular service config on
+full <code>NixOS</code>.</p>
+<h2 id="what-it-provides-1"><a class="header" href="#what-it-provides-1">What it provides</a></h2>
+<p>For each <code>nimi.&lt;name&gt;</code> entry, the module generates:</p>
+<ul>
+<li><code>environment.systemPackages</code>: the <code>Nimi</code> runtime binary built from the services module.</li>
+<li><code>systemd.services.&lt;name&gt;</code>: a system service that runs the generated binary.</li>
+</ul>
+<h2 id="minimal-example-2"><a class="header" href="#minimal-example-2">Minimal example</a></h2>
+<pre><code class="language-nix">{
+  imports = [
+    inputs.nimi.nixosModules.default
+  ];
+
+  nimi."web" = {
+    services."my-app" = {
+      process.argv = [
+        (lib.getExe pkgs.my-app)
+        "--port"
+        "8080"
+      ];
+    };
+    settings.restart.mode = "up-to-count";
+    settings.restart.time = 2000;
+  };
+}
+</code></pre>
+<h2 id="notes-3"><a class="header" href="#notes-3">Notes</a></h2>
+<ul>
+<li>Each <code>nimi.&lt;name&gt;</code> becomes a <code>systemd</code> unit named <code>&lt;name&gt;.service</code>.</li>
+<li>The service is configured with a basic restart policy; override in <code>systemd.services</code> if needed.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="home-manager-module"><a class="header" href="#home-manager-module">Home Manager Module</a></h1>
+<p>The Home Manager module output (<code>nimi.homeModules.default</code>) wires <code>Nimi</code> into a
+Home Manager configuration. It takes named service definitions and turns them
+into user packages and <code>systemd</code> user units, so you can run the same modular
+service config as per-user services.</p>
+<h2 id="what-it-provides-2"><a class="header" href="#what-it-provides-2">What it provides</a></h2>
+<p>For each <code>nimi.&lt;name&gt;</code> entry, the module generates:</p>
+<ul>
+<li><code>home.packages</code>: the <code>Nimi</code> runtime binary built from the services module.</li>
+<li><code>systemd.user.services.&lt;name&gt;</code>: a user service that runs the generated binary.</li>
+</ul>
+<h2 id="minimal-example-3"><a class="header" href="#minimal-example-3">Minimal example</a></h2>
+<pre><code class="language-nix">{
+  imports = [
+    inputs.nimi.homeModules.default
+  ];
+
+  nimi."web" = {
+    services."my-app" = {
+      process.argv = [
+        (lib.getExe pkgs.my-app)
+        "--port"
+        "8080"
+      ];
+    };
+    settings.restart.mode = "up-to-count";
+    settings.restart.time = 2000;
+  };
+}
+</code></pre>
+<h2 id="notes-4"><a class="header" href="#notes-4">Notes</a></h2>
+<ul>
+<li>Each <code>nimi.&lt;name&gt;</code> becomes a <code>systemd --user</code> unit named <code>&lt;name&gt;.service</code>.</li>
+<li>User services may require <code>loginctl enable-linger</code> if you need them running without an active session.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="sec-functions-library-"><a class="header" href="#sec-functions-library-">Nimi library functions</a></h1>
+<h2 id="niminimi.evalNimiModule"><a class="header" href="#niminimi.evalNimiModule"><code>nimi.evalNimiModule</code></a></h2>
+<p>Evaluate a nimi module and return its config. This runs the module set
+through <code>lib.evalModules</code> with the nimi module included so you get the
+fully merged, validated configuration output.</p>
+<h3 id="example-2"><a class="header" href="#example-2">Example</a></h3>
+<pre><code class="language-nix">evalNimiModule {
+  settings.binName = "my-nimi";
+}
+</code></pre>
+<h3 id="type"><a class="header" href="#type">Type</a></h3>
+<pre><code>evalNimiModule :: AttrSet -&gt; AttrSet
+</code></pre>
+<h3 id="arguments"><a class="header" href="#arguments">Arguments</a></h3>
+<dl>
+<dt id="module"><a class="header" href="#module">module</a></dt>
+<dd>A nimi module attrset.</dd>
+</dl>
+<h2 id="niminimi.toNimiJson"><a class="header" href="#niminimi.toNimiJson"><code>nimi.toNimiJson</code></a></h2>
+<p>Render an evaluated config to validated JSON. The config is serialized,
+formatted with <code>jq</code>, then validated by running <code>nimi --config ... validate</code>
+so the resulting file is both pretty-printed and schema-checked.</p>
+<h3 id="example-1-1"><a class="header" href="#example-1-1">Example</a></h3>
+<pre><code class="language-nix">let cfg = evalNimiModule { settings.binName = "my-nimi"; };
+in toNimiJson cfg
+</code></pre>
+<h3 id="type-1"><a class="header" href="#type-1">Type</a></h3>
+<pre><code>toNimiJson :: AttrSet -&gt; Path
+</code></pre>
+<h3 id="arguments-1"><a class="header" href="#arguments-1">Arguments</a></h3>
+<dl>
+<dt id="evaluatedconfig"><a class="header" href="#evaluatedconfig">evaluatedConfig</a></dt>
+<dd>The evaluated nimi config.</dd>
+</dl>
+<h2 id="niminimi.mkNimiBin"><a class="header" href="#niminimi.mkNimiBin"><code>nimi.mkNimiBin</code></a></h2>
+<p>Build a wrapper binary for a given nimi module. This evaluates the module,
+writes a validated JSON config, and emits a shell wrapper that runs <code>nimi</code>
+with that config so consumers can execute it like a normal binary.</p>
+<h3 id="example-2-1"><a class="header" href="#example-2-1">Example</a></h3>
+<pre><code class="language-nix">mkNimiBin { settings.binName = "my-nimi"; }
+</code></pre>
+<h3 id="type-2"><a class="header" href="#type-2">Type</a></h3>
+<pre><code>mkNimiBin :: AttrSet -&gt; Derivation
+</code></pre>
+<h3 id="arguments-2"><a class="header" href="#arguments-2">Arguments</a></h3>
+<dl>
+<dt id="module-1"><a class="header" href="#module-1">module</a></dt>
+<dd>A nimi module attrset.</dd>
+</dl>
+<h2 id="niminimi.mkContainerImage"><a class="header" href="#niminimi.mkContainerImage"><code>nimi.mkContainerImage</code></a></h2>
+<p>Build a container image for a given nimi module. This evaluates the module,
+wires the container entrypoint to the wrapper binary, and uses
+<code>nix2container.buildImage</code> when available (otherwise <code>dockerTools.buildImage</code>).</p>
+<h3 id="example-3"><a class="header" href="#example-3">Example</a></h3>
+<pre><code class="language-nix">mkContainerImage { settings.binName = "my-nimi"; }
+</code></pre>
+<h3 id="type-3"><a class="header" href="#type-3">Type</a></h3>
+<pre><code>mkContainerImage :: AttrSet -&gt; Derivation
+</code></pre>
+<h3 id="arguments-3"><a class="header" href="#arguments-3">Arguments</a></h3>
+<dl>
+<dt id="module-2"><a class="header" href="#module-2">module</a></dt>
+<dd>A nimi module attrset.</dd>
+</dl>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="options"><a href="#options" class="header">Options</a></h1>
+<h2 id="_moduleargs"><a class="header" href="#_moduleargs">_module.args</a></h2>
 <p>Additional arguments passed to each module in addition to ones
 like <code>lib</code>, <code>config</code>,
 and <code>pkgs</code>, <code>modulesPath</code>.</p>
@@ -770,9 +1149,6 @@ null or path in the Nix store</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="functions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
-                            </a>
 
 
                         <div style="clear: both"></div>
@@ -781,9 +1157,6 @@ null or path in the Nix store</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="functions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
-                    </a>
 
             </nav>
 
@@ -812,6 +1185,11 @@ null or path in the Nix store</p>
 
         <!-- Custom JS scripts -->
 
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
 
 
     </div>
