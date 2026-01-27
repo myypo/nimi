@@ -84,7 +84,7 @@
       flakeModules.default = lib.modules.importApply ./nix/modules/flake-parts.nix {
         inherit nix2container;
       };
-      nimiModules.default = import ./nix/modules/nimi.nix;
+      modules.nimi.default = import ./nix/modules/nimi.nix;
     };
 
   nixConfig = {
