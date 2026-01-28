@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "ayu";
-            window.path_to_searchindex_js = "searchindex-eb5a0d7c.js";
+            window.path_to_searchindex_js = "searchindex-89612f64.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-7f147711.js"></script>
@@ -180,16 +180,15 @@
                         <h1 id="sandbox"><a class="header" href="#sandbox">Sandbox</a></h1>
 <p><code>Nimi</code> provides a lightweight sandbox runner via <code>mkBwrap</code>. It uses
 <a href="https://github.com/containers/bubblewrap">bubblewrap</a> to run your services in
-an isolated environment that mimics a container, without requiring container
-runtimes like Docker or Podman.</p>
+an isolated environment without requiring container runtimes like Docker or
+Podman.</p>
 <h2 id="what-it-provides"><a class="header" href="#what-it-provides">What it provides</a></h2>
 <ul>
-<li><strong>Isolated filesystem</strong>: A tmpfs-based root with your rootfs directories bound read-only.</li>
-<li><strong>Container-like layout</strong>: Uses <code>settings.container.copyToRoot</code> to build the root filesystem.</li>
-<li><strong>Environment variables</strong>: Applies <code>settings.container.imageConfig.Env</code>.</li>
-<li><strong>Working directory</strong>: Applies <code>settings.container.imageConfig.WorkingDir</code>.</li>
-<li><strong>Volumes</strong>: Mounts <code>settings.container.imageConfig.Volumes</code> as writable tmpfs.</li>
-<li><strong>Writable directories</strong>: <code>/tmp</code>, <code>/run</code>, and <code>/var</code> are tmpfs mounts for runtime writes.</li>
+<li><strong>Isolated filesystem</strong>: A tmpfs-based root with selective host paths bound read-only.</li>
+<li><strong>Environment variables</strong>: Set via <code>settings.bubblewrap.environment</code>.</li>
+<li><strong>Working directory</strong>: Set via <code>settings.bubblewrap.chdir</code>.</li>
+<li><strong>Namespace isolation</strong>: Separate user, PID, UTS, IPC, and cgroup namespaces by default.</li>
+<li><strong>Writable directories</strong>: <code>/tmp</code>, <code>/run</code>, <code>/var</code>, <code>/etc</code> are tmpfs mounts for runtime writes.</li>
 <li><strong>Nix store access</strong>: <code>/nix/store</code> is bind-mounted read-only so binaries can access their dependencies.</li>
 </ul>
 <h2 id="minimal-example"><a class="header" href="#minimal-example">Minimal example</a></h2>
@@ -197,36 +196,75 @@ runtimes like Docker or Podman.</p>
   services."my-app" = {
     process.argv = [ (lib.getExe pkgs.my-app) ];
   };
-  settings.container = {
-    copyToRoot = [
-      (pkgs.buildEnv {
-        name = "root";
-        paths = [ pkgs.coreutils pkgs.bash ];
-        pathsToLink = [ "/bin" ];
-      })
-    ];
-    imageConfig = {
-      Env = [ "MY_VAR=value" ];
-      WorkingDir = "/app";
-      Volumes = { "/data" = { }; };
-    };
+  settings.bubblewrap = {
+    environment.MY_VAR = "value";
+    chdir = "/app";
+    extraTmpfs = [ "/data" ];
   };
-};
+}
 </code></pre>
 <p>Run the sandbox:</p>
 <pre><code class="language-bash">nix run .#my-sandbox
 </code></pre>
+<h2 id="configuration-options"><a class="header" href="#configuration-options">Configuration options</a></h2>
+<p>The <code>settings.bubblewrap</code> module provides these options:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Option</th><th>Description</th><th>Default</th></tr>
+</thead>
+<tbody>
+<tr><td><code>environment</code></td><td>Attribute set of environment variables</td><td><code>{ }</code></td></tr>
+<tr><td><code>chdir</code></td><td>Working directory inside the sandbox</td><td><code>null</code></td></tr>
+<tr><td><code>roBinds</code></td><td>Read-only bind mounts from host</td><td><code>/nix/store</code>, <code>/sys</code>, <code>/etc/resolv.conf</code></td></tr>
+<tr><td><code>tmpfs</code></td><td>Paths mounted as writable tmpfs</td><td><code>/nix</code>, <code>/tmp</code>, <code>/run</code>, <code>/var</code>, <code>/etc</code></td></tr>
+<tr><td><code>extraTmpfs</code></td><td>Additional tmpfs paths (appended to <code>tmpfs</code>)</td><td><code>[ ]</code></td></tr>
+<tr><td><code>bind.dev</code></td><td>Bind <code>/dev</code> into sandbox</td><td><code>true</code></td></tr>
+<tr><td><code>bind.proc</code></td><td>Bind <code>/proc</code> into sandbox</td><td><code>true</code></td></tr>
+<tr><td><code>share.net</code></td><td>Share host network namespace</td><td><code>true</code></td></tr>
+<tr><td><code>unshare.user</code></td><td>Create new user namespace</td><td><code>true</code></td></tr>
+<tr><td><code>unshare.pid</code></td><td>Create new PID namespace</td><td><code>true</code></td></tr>
+<tr><td><code>unshare.uts</code></td><td>Create new UTS namespace</td><td><code>true</code></td></tr>
+<tr><td><code>unshare.ipc</code></td><td>Create new IPC namespace</td><td><code>true</code></td></tr>
+<tr><td><code>unshare.cgroup</code></td><td>Create new cgroup namespace</td><td><code>true</code></td></tr>
+<tr><td><code>unshare.net</code></td><td>Create new network namespace</td><td><code>true</code></td></tr>
+<tr><td><code>dieWithParent</code></td><td>Terminate when parent exits</td><td><code>true</code></td></tr>
+<tr><td><code>prependFlags</code></td><td>Extra bwrap flags (prepended)</td><td><code>[ ]</code></td></tr>
+<tr><td><code>appendFlags</code></td><td>Extra bwrap flags (appended)</td><td><code>[ ]</code></td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="extended-example"><a class="header" href="#extended-example">Extended example</a></h2>
+<pre><code class="language-nix">pkgs.nimi.mkBwrap {
+  services."web-server" = {
+    process.argv = [ (lib.getExe pkgs.nginx) "-g" "daemon off;" ];
+  };
+  settings.bubblewrap = {
+    environment = {
+      APP_ENV = "production";
+      LOG_LEVEL = "info";
+    };
+    chdir = "/srv";
+    roBinds = [
+      { src = "/nix/store"; dest = "/nix/store"; }
+      { src = "/etc/ssl"; dest = "/etc/ssl"; }
+      { src = "/run/secrets"; dest = "/secrets"; }
+    ];
+    extraTmpfs = [ "/var/cache/nginx" ];
+    share.net = true;
+  };
+}
+</code></pre>
 <h2 id="how-it-works"><a class="header" href="#how-it-works">How it works</a></h2>
 <ol>
-<li><strong>Build time</strong>: <code>copyToRoot</code> derivations are merged into a single rootfs using <code>symlinkJoin</code>.</li>
-<li><strong>Execution</strong>: <code>bwrap</code> runs the <code>Nimi</code> binary inside an isolated namespace with:
+<li><strong>Build time</strong>: The nimi binary is wrapped in a shell script that invokes <code>bwrap</code>.</li>
+<li><strong>Execution</strong>: <code>bwrap</code> runs the nimi binary inside an isolated namespace with:
 <ul>
-<li>A tmpfs as the root filesystem</li>
-<li>Directories from <code>copyToRoot</code> bound read-only</li>
-<li><code>/nix/store</code> bind-mounted read-only</li>
-<li><code>/tmp</code>, <code>/run</code>, <code>/var</code> as writable tmpfs</li>
-<li>Environment variables and working directory from <code>imageConfig</code></li>
-<li>Volumes as tmpfs mounts</li>
+<li>Tmpfs mounts created first (providing writable areas)</li>
+<li>Read-only bind mounts layered on top (e.g., <code>/nix/store</code> over <code>/nix</code>)</li>
+<li><code>/dev</code> and <code>/proc</code> bound from the host</li>
+<li>Environment variables and working directory applied</li>
+<li>Namespaces unshared according to configuration</li>
 </ul>
 </li>
 </ol>
@@ -242,16 +280,17 @@ runtimes like Docker or Podman.</p>
 <tr><td>Startup time</td><td>Fast (no image loading)</td><td>Depends on runtime</td></tr>
 <tr><td>Portability</td><td>Linux only</td><td>Any OCI-compatible runtime</td></tr>
 <tr><td>Base images</td><td>Not supported</td><td>Supported via <code>fromImage</code></td></tr>
-<tr><td>Writable root</td><td>No (tmpfs dirs only)</td><td>Yes</td></tr>
+<tr><td>Root filesystem</td><td>Tmpfs with bind mounts</td><td>Layered image filesystem</td></tr>
 </tbody>
 </table>
 </div>
 <h2 id="notes"><a class="header" href="#notes">Notes</a></h2>
 <ul>
 <li>The sandbox requires Linux with user namespaces enabled.</li>
-<li>The rootfs is read-only; writes go to tmpfs directories (<code>/tmp</code>, <code>/run</code>, <code>/var</code>, and configured volumes).</li>
+<li>Writes go to tmpfs directories; they are lost when the sandbox exits.</li>
 <li>Signal handling (Ctrl+C) is supported.</li>
-<li>The <code>entrypoint</code> is always the generated <code>Nimi</code> runner from <code>mkNimiBin</code>.</li>
+<li>The entrypoint is always the generated nimi runner from <code>mkNimiBin</code>.</li>
+<li>Not available on macOS (<code>meta.badPlatforms</code> includes Darwin).</li>
 </ul>
 
                     </main>
