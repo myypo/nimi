@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "ayu";
-            window.path_to_searchindex_js = "searchindex-89612f64.js";
+            window.path_to_searchindex_js = "searchindex-bd217c1b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-7f147711.js"></script>
@@ -206,34 +206,6 @@ Podman.</p>
 <p>Run the sandbox:</p>
 <pre><code class="language-bash">nix run .#my-sandbox
 </code></pre>
-<h2 id="configuration-options"><a class="header" href="#configuration-options">Configuration options</a></h2>
-<p>The <code>settings.bubblewrap</code> module provides these options:</p>
-<div class="table-wrapper">
-<table>
-<thead>
-<tr><th>Option</th><th>Description</th><th>Default</th></tr>
-</thead>
-<tbody>
-<tr><td><code>environment</code></td><td>Attribute set of environment variables</td><td><code>{ }</code></td></tr>
-<tr><td><code>chdir</code></td><td>Working directory inside the sandbox</td><td><code>null</code></td></tr>
-<tr><td><code>roBinds</code></td><td>Read-only bind mounts from host</td><td><code>/nix/store</code>, <code>/sys</code>, <code>/etc/resolv.conf</code></td></tr>
-<tr><td><code>tmpfs</code></td><td>Paths mounted as writable tmpfs</td><td><code>/nix</code>, <code>/tmp</code>, <code>/run</code>, <code>/var</code>, <code>/etc</code></td></tr>
-<tr><td><code>extraTmpfs</code></td><td>Additional tmpfs paths (appended to <code>tmpfs</code>)</td><td><code>[ ]</code></td></tr>
-<tr><td><code>bind.dev</code></td><td>Bind <code>/dev</code> into sandbox</td><td><code>true</code></td></tr>
-<tr><td><code>bind.proc</code></td><td>Bind <code>/proc</code> into sandbox</td><td><code>true</code></td></tr>
-<tr><td><code>share.net</code></td><td>Share host network namespace</td><td><code>true</code></td></tr>
-<tr><td><code>unshare.user</code></td><td>Create new user namespace</td><td><code>true</code></td></tr>
-<tr><td><code>unshare.pid</code></td><td>Create new PID namespace</td><td><code>true</code></td></tr>
-<tr><td><code>unshare.uts</code></td><td>Create new UTS namespace</td><td><code>true</code></td></tr>
-<tr><td><code>unshare.ipc</code></td><td>Create new IPC namespace</td><td><code>true</code></td></tr>
-<tr><td><code>unshare.cgroup</code></td><td>Create new cgroup namespace</td><td><code>true</code></td></tr>
-<tr><td><code>unshare.net</code></td><td>Create new network namespace</td><td><code>true</code></td></tr>
-<tr><td><code>dieWithParent</code></td><td>Terminate when parent exits</td><td><code>true</code></td></tr>
-<tr><td><code>prependFlags</code></td><td>Extra bwrap flags (prepended)</td><td><code>[ ]</code></td></tr>
-<tr><td><code>appendFlags</code></td><td>Extra bwrap flags (appended)</td><td><code>[ ]</code></td></tr>
-</tbody>
-</table>
-</div>
 <h2 id="extended-example"><a class="header" href="#extended-example">Extended example</a></h2>
 <pre><code class="language-nix">pkgs.nimi.mkBwrap {
   services."web-server" = {
