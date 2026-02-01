@@ -1,14 +1,14 @@
 use eyre::{Error, Result, eyre};
 use serde::{Deserialize, Deserializer, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 /// Service process configuration
 pub struct Process {
     /// Argv used to run the service
     pub argv: ArgV,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ArgV(Vec<String>);
 
 impl ArgV {

@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 /// Convenience type for the map of config data
 pub type ConfigDataMap = HashMap<String, ConfigData>;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 /// Service confguration data
 pub struct ConfigData {
     /// If this piece of config data was enabled

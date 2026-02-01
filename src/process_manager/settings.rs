@@ -11,7 +11,7 @@ use serde_with::serde_as;
 /// Settings Struct
 ///
 /// Process manager runtime settings for configuring things like restart behaviour
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Settings {
     /// The restart specific settings
     pub restart: Restart,
@@ -26,7 +26,7 @@ pub struct Settings {
 /// Startup Settings Struct
 ///
 /// Configuration for how nimi gets started
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Startup {
     /// Binary to run on startup before starting services
     #[serde(rename = "runOnStartup")]
@@ -36,7 +36,7 @@ pub struct Startup {
 /// Logging Settings Struct
 ///
 /// Configuration for how nimi prints logs
-#[derive(Debug, Default, Serialize)]
+#[derive(Debug, Default, Clone, Serialize)]
 pub struct Logging {
     /// The stringified path to the logs directory to use
     ///
@@ -74,7 +74,7 @@ struct LoggingRaw {
 ///
 /// Configuration for how nimi gets restarted
 #[serde_as]
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Restart {
     /// The mode to use for restarts
     pub mode: RestartMode,
@@ -91,7 +91,7 @@ pub struct Restart {
 /// Restart Mode
 ///
 /// Selects how the processes get restarted on failure
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize)]
 pub enum RestartMode {
     /// Don't restart, ever
     #[default]

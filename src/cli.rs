@@ -93,7 +93,7 @@ impl Cli {
             Command::Run => {
                 info!("Launching process manager...");
 
-                ProcessManager::new(config.services, config.settings)
+                ProcessManager::new(config.services, config.settings, self.config.clone())
                     .run()
                     .await
                     .wrap_err("Failed to run processes")?;
