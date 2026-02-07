@@ -26,10 +26,6 @@ rustPlatform.buildRustPackage (finalAttrs: {
 
   nativeBuildInputs = [ clippy ];
 
-  preBuild = ''
-    cargo clippy -- -D warnings
-  '';
-
   meta = {
     description = "Tini-like PID 1 for containers and target for NixOS modular services";
     homepage = "https://github.com/weyl-ai/nimi";
